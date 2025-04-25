@@ -1,13 +1,14 @@
 package com.wnc.internet_banking.controller;
 
+import com.wnc.internet_banking.dto.request.auth.ChangePasswordRequest;
 import com.wnc.internet_banking.dto.request.auth.LoginRequest;
 import com.wnc.internet_banking.dto.response.auth.LoginResponse;
 import com.wnc.internet_banking.service.AuthService;
 import com.wnc.internet_banking.util.JwtUtil;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +32,6 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<String> logoutUser() {
         // Lấy thông tin authentication từ SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -49,7 +49,21 @@ public class AuthController {
 
             return ResponseEntity.ok("Logged out successfully");
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+            throw new AccessDeniedException("Unauthorized");
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            System.out.println("User is authenticated");
+            UUID userId = UUID.fromString(authentication.getName());
+            authService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.ok("Password changed successfully");
+        } else {
+            throw new AccessDeniedException("Unauthorized");
         }
     }
 }

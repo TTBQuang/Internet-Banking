@@ -2,7 +2,6 @@ package com.wnc.internet_banking.controller;
 
 import com.wnc.internet_banking.dto.response.auth.AccountDto;
 import com.wnc.internet_banking.service.AccountService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,7 +20,6 @@ public class AccountController {
     private AccountService accountService;
 
     @GetMapping()
-    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<AccountDto> getAccountByUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

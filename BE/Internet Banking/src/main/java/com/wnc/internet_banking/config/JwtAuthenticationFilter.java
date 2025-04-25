@@ -104,6 +104,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.getWriter().write(json);
                 return;
             }
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            String json = new ObjectMapper().writeValueAsString(
+                    Collections.singletonMap("message", "Unauthorized")
+            );
+            response.getWriter().write(json);
+            return;
         }
         filterChain.doFilter(request, response);
     }
