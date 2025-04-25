@@ -1,4 +1,4 @@
-package com.wnc.internet_banking.config;
+package com.wnc.internet_banking.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wnc.internet_banking.entity.User;
@@ -38,33 +38,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             if (jwtUtil.validateToken(token)) {
+                // Get user id from db
                 UUID userId = jwtUtil.getUserIdFromToken(token);
-
-                // Truy vấn database để lấy thông tin user
                 Optional<User> userOptional = userRepository.findByUserId(userId);
 
                 if (userOptional.isPresent()) {
                     User user = userOptional.get();
 
-                    // Tạo danh sách quyền dựa trên role của user
-                    List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+                    // Assign role
+                    List<GrantedAuthority> authorities = List.of(
+                            new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                    );
 
-                    // Thêm các quyền cụ thể nếu cần
-                    switch (user.getRole()) {
-                        case ADMIN:
-                            authorities.add(new SimpleGrantedAuthority("FULL_ACCESS"));
-                            authorities.add(new SimpleGrantedAuthority("COMMENT"));
-                            break;
-                        case EMPLOYEE:
-                            authorities.add(new SimpleGrantedAuthority("COMMENT"));
-                            break;
-                        case CUSTOMER:
-                            authorities.add(new SimpleGrantedAuthority("COMMENT"));
-                            break;
-                    }
-
-                    // Tạo UserDetails từ thông tin user
                     UserDetails userDetails =
                             org.springframework.security.core.userdetails.User.builder()
                                     .username(userId.toString())
@@ -72,7 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     .authorities(authorities)
                                     .build();
 
-                    // Tạo authentication token
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
@@ -80,39 +64,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     authorities
                             );
 
-                    // Thêm thông tin chi tiết về request hiện tại
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    // Cập nhật SecurityContext với authentication đã xác thực
+                    // Update SecurityContextHolder
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
-                    // Không tìm thấy user
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    String json = new ObjectMapper().writeValueAsString(
-                            Collections.singletonMap("message", "User not found")
-                    );
-                    response.getWriter().write(json);
+                    returnErrorMessage(response, "User not found");
                     return;
                 }
             } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                String json = new ObjectMapper().writeValueAsString(
-                        Collections.singletonMap("message", "Invalid or expired token")
-                );
-                response.getWriter().write(json);
+                returnErrorMessage(response, "Invalid token");
                 return;
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            String json = new ObjectMapper().writeValueAsString(
-                    Collections.singletonMap("message", "Unauthorized")
-            );
-            response.getWriter().write(json);
+            returnErrorMessage(response, "Unauthorized");
             return;
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void returnErrorMessage(@NonNull HttpServletResponse response, String message) throws IOException{
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        String json = new ObjectMapper().writeValueAsString(
+                Collections.singletonMap("message", message)
+        );
+        response.getWriter().write(json);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        // Ignore paths for Swagger and other static resources
+        return path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-ui")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/swagger-resources")
+                || path.startsWith("/webjars")
+                || path.equals("/auth/login");
     }
 }

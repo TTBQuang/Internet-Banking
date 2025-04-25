@@ -58,7 +58,6 @@ public class AuthController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
-            System.out.println("User is authenticated");
             UUID userId = UUID.fromString(authentication.getName());
             authService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
             return ResponseEntity.ok("Password changed successfully");
