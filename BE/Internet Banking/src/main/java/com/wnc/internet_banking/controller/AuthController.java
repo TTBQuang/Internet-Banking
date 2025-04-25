@@ -1,14 +1,55 @@
 package com.wnc.internet_banking.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
+import com.wnc.internet_banking.dto.request.auth.LoginRequest;
+import com.wnc.internet_banking.dto.response.auth.LoginResponse;
+import com.wnc.internet_banking.service.AuthService;
+import com.wnc.internet_banking.util.JwtUtil;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/auth")
+@AllArgsConstructor
 public class AuthController {
-    @GetMapping("/login")
-    public String login() {
-        return "Login successful!";
+    private final AuthService authService;
+    private final JwtUtil jwtUtil;
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest request) {
+        LoginResponse response = authService.loginUser(request.getUsername(), request.getPassword());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<String> logoutUser() {
+        // Lấy thông tin authentication từ SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            // Lấy userId từ principal (username)
+            String userIdString = authentication.getName();
+            UUID userId = UUID.fromString(userIdString);
+
+            // Đăng xuất user
+            authService.logoutUser(userId);
+
+            // Xóa context authentication
+            SecurityContextHolder.clearContext();
+
+            return ResponseEntity.ok("Logged out successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
     }
 }
