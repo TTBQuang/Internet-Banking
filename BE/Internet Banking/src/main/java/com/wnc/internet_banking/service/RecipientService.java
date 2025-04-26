@@ -11,6 +11,7 @@ import com.wnc.internet_banking.repository.RecipientRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -57,5 +58,18 @@ public class RecipientService {
         }
 
         return recipientRepository.save(recipient);
+    }
+
+    @Transactional
+    public void deleteRecipient(UUID recipientId) {
+        Recipient recipient = recipientRepository.findById(recipientId)
+                .orElseThrow(() -> new IllegalArgumentException("Recipient not found"));
+        recipientRepository.delete(recipient);
+    }
+
+    public boolean isRecipientOwner(UUID recipientId, String userId) {
+        return recipientRepository.findById(recipientId)
+                .map(recipient -> userId.equals(recipient.getOwner().getUserId().toString()))
+                .orElse(false);
     }
 }

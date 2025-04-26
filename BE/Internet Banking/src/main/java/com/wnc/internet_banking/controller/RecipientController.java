@@ -3,16 +3,12 @@ package com.wnc.internet_banking.controller;
 import com.wnc.internet_banking.dto.request.recipient.RecipientCreateRequest;
 import com.wnc.internet_banking.entity.Recipient;
 import com.wnc.internet_banking.service.RecipientService;
+import com.wnc.internet_banking.util.SecurityUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -24,14 +20,15 @@ public class RecipientController {
 
     @PostMapping
     public ResponseEntity<Recipient> createRecipient(@RequestBody RecipientCreateRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UUID userId = SecurityUtil.getCurrentUserId();
+        Recipient savedRecipient = recipientService.addRecipient(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipient);
+    }
 
-        if (authentication != null && authentication.isAuthenticated()) {
-            UUID userId = UUID.fromString(authentication.getName());
-            Recipient savedRecipient = recipientService.addRecipient(userId, request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipient);
-        } else {
-            throw new AccessDeniedException("Unauthorized");
-        }
+    @DeleteMapping("/{id}")
+    @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name)")
+    public ResponseEntity<String> deleteRecipient(@PathVariable UUID id) {
+        recipientService.deleteRecipient(id);
+        return ResponseEntity.ok("Recipient deleted successfully");
     }
 }

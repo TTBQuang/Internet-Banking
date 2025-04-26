@@ -4,15 +4,16 @@ import com.wnc.internet_banking.dto.request.auth.ChangePasswordRequest;
 import com.wnc.internet_banking.dto.request.auth.LoginRequest;
 import com.wnc.internet_banking.dto.response.auth.LoginResponse;
 import com.wnc.internet_banking.service.AuthService;
-import com.wnc.internet_banking.util.JwtUtil;
+import com.wnc.internet_banking.util.SecurityUtil;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -31,43 +32,17 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logoutUser() {
-        // Lấy thông tin authentication từ SecurityContext
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            // Lấy userId từ principal (username)
-            String userIdString = authentication.getName();
-            UUID userId = UUID.fromString(userIdString);
-
-            // Đăng xuất user
-            authService.logoutUser(userId);
-
-            // Xóa context authentication
-            SecurityContextHolder.clearContext();
-
-            return ResponseEntity.ok("Logged out successfully");
-        } else {
-            throw new AccessDeniedException("Unauthorized");
-        }
+        UUID userId = SecurityUtil.getCurrentUserId();
+        authService.logoutUser(userId);
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Logged out successfully");
     }
+
 
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            UUID userId = UUID.fromString(authentication.getName());
-            authService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
-            return ResponseEntity.ok("Password changed successfully");
-        } else {
-            throw new AccessDeniedException("Unauthorized");
-        }
+        UUID userId = SecurityUtil.getCurrentUserId();
+        authService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
+        return ResponseEntity.ok("Password changed successfully");
     }
-
-    @GetMapping("/generate-password")
-    public ResponseEntity<String> generatePassword(@RequestParam String rawPassword) {
-        String hashed = passwordEncoder.encode(rawPassword);
-        return ResponseEntity.ok(hashed);
-    }
-
 }
