@@ -9,7 +9,8 @@ import java.util.UUID;
 @Table(name = "linked_banks")
 public class LinkedBank {
     @Id
-    @Column(name = "linked_bank_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "linked_bank_id", updatable = false, nullable = false)
     private UUID linkedBankId;
 
     @Column(name = "bank_code", nullable = false, unique = true)

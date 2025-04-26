@@ -9,7 +9,8 @@ import java.util.UUID;
 @Table(name = "otps")
 public class Otp {
     @Id
-    @Column(name = "otp_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "otp_id", updatable = false, nullable = false)
     private UUID otpId;
 
     @ManyToOne
