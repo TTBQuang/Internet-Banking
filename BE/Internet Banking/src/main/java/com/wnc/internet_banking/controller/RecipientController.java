@@ -1,11 +1,14 @@
 package com.wnc.internet_banking.controller;
 
 import com.wnc.internet_banking.dto.request.recipient.RecipientCreateRequest;
+import com.wnc.internet_banking.dto.request.recipient.RecipientUpdateRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.recipient.RecipientDto;
 import com.wnc.internet_banking.service.RecipientService;
 import com.wnc.internet_banking.util.SecurityUtil;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,5 +34,25 @@ public class RecipientController {
     public ResponseEntity<BaseResponse<Void>> deleteRecipient(@PathVariable UUID id) {
         recipientService.deleteRecipient(id);
         return ResponseEntity.ok(BaseResponse.message("Recipient deleted successfully"));
+    }
+
+    @GetMapping
+    public ResponseEntity<BaseResponse<Page<RecipientDto>>> getRecipients(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+        Page<RecipientDto> recipients = recipientService.getRecipientsByUser(userId, page, size);
+        return ResponseEntity.ok(BaseResponse.data(recipients));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name)")
+    public ResponseEntity<BaseResponse<RecipientDto>> updateRecipientNickname(
+            @PathVariable UUID id,
+            @Valid @RequestBody RecipientUpdateRequest request
+    ) {
+        RecipientDto updatedRecipient = recipientService.updateRecipientNickname(id, request);
+        return ResponseEntity.ok(BaseResponse.data(updatedRecipient));
     }
 }
