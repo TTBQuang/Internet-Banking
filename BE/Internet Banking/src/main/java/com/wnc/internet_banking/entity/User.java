@@ -12,7 +12,8 @@ import java.util.UUID;
 @Setter
 public class User {
     @Id
-    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "user_id", updatable = false, nullable = false)
     private UUID userId;
 
     @Column(unique = true)

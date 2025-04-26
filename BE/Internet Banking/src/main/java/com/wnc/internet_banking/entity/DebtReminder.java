@@ -9,7 +9,8 @@ import java.util.UUID;
 @Table(name = "debt_reminders")
 public class DebtReminder {
     @Id
-    @Column(name = "debt_reminder_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "debt_reminder_id", updatable = false, nullable = false)
     private UUID debtReminderId;
 
     @ManyToOne

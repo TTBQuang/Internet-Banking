@@ -9,7 +9,8 @@ import java.util.UUID;
 @Table(name = "transactions")
 public class Transaction {
     @Id
-    @Column(name = "transaction_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "transaction_id", updatable = false, nullable = false)
     private UUID transactionId;
 
     @Column(name = "sender_account_number", nullable = false)

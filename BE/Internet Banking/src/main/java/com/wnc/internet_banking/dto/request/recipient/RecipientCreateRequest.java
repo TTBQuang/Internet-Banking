@@ -13,6 +13,5 @@ public class RecipientCreateRequest {
     @NotBlank(message = "Recipient nickname is required")
     private String nickname;
 
-    @NotBlank(message = "Bank code is required")
     private String bankCode;
 }

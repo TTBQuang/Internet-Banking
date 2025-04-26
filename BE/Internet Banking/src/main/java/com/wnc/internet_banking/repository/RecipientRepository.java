@@ -8,5 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface RecipientRepository extends JpaRepository<Recipient, UUID> {
+    boolean existsByOwnerUserIdAndAccountNumberAndBankBankCode(UUID ownerId, String accountNumber, String bankCode);
 }
 
