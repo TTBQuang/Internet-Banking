@@ -14,4 +14,5 @@ public class RecipientCreateRequest {
     private String nickname;
 
     private String bankCode;
+    private String fullName; // Not null when bankCode is not null
 }

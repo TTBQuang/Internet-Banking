@@ -1,7 +1,8 @@
 package com.wnc.internet_banking.controller;
 
 import com.wnc.internet_banking.dto.request.recipient.RecipientCreateRequest;
-import com.wnc.internet_banking.entity.Recipient;
+import com.wnc.internet_banking.dto.response.BaseResponse;
+import com.wnc.internet_banking.dto.response.recipient.RecipientDto;
 import com.wnc.internet_banking.service.RecipientService;
 import com.wnc.internet_banking.util.SecurityUtil;
 import lombok.AllArgsConstructor;
@@ -19,16 +20,16 @@ public class RecipientController {
     private final RecipientService recipientService;
 
     @PostMapping
-    public ResponseEntity<Recipient> createRecipient(@RequestBody RecipientCreateRequest request) {
+    public ResponseEntity<BaseResponse<RecipientDto>> createRecipient(@RequestBody RecipientCreateRequest request) {
         UUID userId = SecurityUtil.getCurrentUserId();
-        Recipient savedRecipient = recipientService.addRecipient(userId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipient);
+        RecipientDto savedRecipient = recipientService.addRecipient(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.data(savedRecipient));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name)")
-    public ResponseEntity<String> deleteRecipient(@PathVariable UUID id) {
+    public ResponseEntity<BaseResponse<Void>> deleteRecipient(@PathVariable UUID id) {
         recipientService.deleteRecipient(id);
-        return ResponseEntity.ok("Recipient deleted successfully");
+        return ResponseEntity.ok(BaseResponse.message("Recipient deleted successfully"));
     }
 }

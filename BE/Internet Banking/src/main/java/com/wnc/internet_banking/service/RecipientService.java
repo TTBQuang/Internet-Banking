@@ -1,6 +1,7 @@
 package com.wnc.internet_banking.service;
 
 import com.wnc.internet_banking.dto.request.recipient.RecipientCreateRequest;
+import com.wnc.internet_banking.dto.response.recipient.RecipientDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.LinkedBank;
 import com.wnc.internet_banking.entity.Recipient;
@@ -10,6 +11,7 @@ import com.wnc.internet_banking.repository.LinkedBankRepository;
 import com.wnc.internet_banking.repository.RecipientRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +26,9 @@ public class RecipientService {
     private final UserRepository userRepository;
     private final LinkedBankRepository linkedBankRepository;
     private final AccountRepository accountRepository;
+    private ModelMapper modelMapper;
 
-    public Recipient addRecipient(UUID userId, RecipientCreateRequest request) {
+    public RecipientDto addRecipient(UUID userId, RecipientCreateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -53,11 +56,12 @@ public class RecipientService {
             LinkedBank bank = linkedBankRepository.findByBankCode(request.getBankCode())
                     .orElseThrow(() -> new IllegalArgumentException("Bank not found"));
             recipient.setBank(bank);
-            // TODO: Call API to get username of recipient if nickname is not provided
-            recipient.setNickname(request.getNickname() != null ? request.getNickname() : "TODO");
+            recipient.setNickname(request.getNickname() != null ? request.getNickname() : request.getFullName());
         }
 
-        return recipientRepository.save(recipient);
+        Recipient savedRecipient = recipientRepository.save(recipient);
+
+        return modelMapper.map(savedRecipient, RecipientDto.class);
     }
 
     @Transactional
