@@ -1,12 +1,14 @@
 package com.wnc.internet_banking.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "linked_banks")
+@Getter
 public class LinkedBank {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
