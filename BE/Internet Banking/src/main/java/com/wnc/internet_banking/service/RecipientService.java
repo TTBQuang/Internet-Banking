@@ -1,6 +1,7 @@
 package com.wnc.internet_banking.service;
 
 import com.wnc.internet_banking.dto.request.recipient.RecipientCreateRequest;
+import com.wnc.internet_banking.dto.request.recipient.RecipientUpdateRequest;
 import com.wnc.internet_banking.dto.response.recipient.RecipientDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.LinkedBank;
@@ -12,6 +13,10 @@ import com.wnc.internet_banking.repository.RecipientRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,5 +80,22 @@ public class RecipientService {
         return recipientRepository.findById(recipientId)
                 .map(recipient -> userId.equals(recipient.getOwner().getUserId().toString()))
                 .orElse(false);
+    }
+
+    public Page<RecipientDto> getRecipientsByUser(UUID userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Recipient> recipients = recipientRepository.findByOwnerUserId(userId, pageable);
+        return recipients.map(recipient -> modelMapper.map(recipient, RecipientDto.class));
+    }
+
+    @Transactional
+    public RecipientDto updateRecipientNickname(UUID recipientId, RecipientUpdateRequest request) {
+        Recipient recipient = recipientRepository.findById(recipientId)
+                .orElseThrow(() -> new IllegalArgumentException("Recipient not found"));
+
+        recipient.setNickname(request.getNickname());
+        Recipient updatedRecipient = recipientRepository.save(recipient);
+
+        return modelMapper.map(updatedRecipient, RecipientDto.class);
     }
 }
