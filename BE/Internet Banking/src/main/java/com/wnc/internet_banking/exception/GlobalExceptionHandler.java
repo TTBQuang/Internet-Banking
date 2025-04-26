@@ -1,5 +1,6 @@
 package com.wnc.internet_banking.exception;
 
+import com.wnc.internet_banking.dto.response.BaseResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,44 +9,46 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+    public ResponseEntity<BaseResponse<Void>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap("message", ex.getMessage()));
+                .body(BaseResponse.message(ex.getMessage()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, String>> handleAccessDeniedException(AccessDeniedException ex) {
+    public ResponseEntity<BaseResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Collections.singletonMap("message", ex.getMessage()));
+                .body(BaseResponse.message(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<BaseResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult().getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(", "));
-        return ResponseEntity.badRequest().body(errorMessage);
+        return ResponseEntity.badRequest().body(BaseResponse.message(errorMessage));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
+    public ResponseEntity<BaseResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap("message", ex.getMessage()));
+                .body(BaseResponse.message(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        System.out.println(ex.toString());
+    public ResponseEntity<BaseResponse<Void>> handleGenericException(Exception ex) {
+        logger.error("Unhandled exception occurred", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Collections.singletonMap("message", "Some error occurred"));
+                .body(BaseResponse.message("Some error occurred"));
     }
 }
