@@ -2,8 +2,10 @@ package com.wnc.internet_banking.controller;
 
 import com.wnc.internet_banking.dto.request.auth.ChangePasswordRequest;
 import com.wnc.internet_banking.dto.request.auth.LoginRequest;
+import com.wnc.internet_banking.dto.request.auth.RefreshTokenRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.auth.LoginResponse;
+import com.wnc.internet_banking.dto.response.auth.TokenResponse;
 import com.wnc.internet_banking.service.AuthService;
 import com.wnc.internet_banking.util.SecurityUtil;
 import jakarta.validation.Valid;
@@ -42,5 +44,11 @@ public class AuthController {
         UUID userId = SecurityUtil.getCurrentUserId();
         authService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok(BaseResponse.message("Password changed successfully"));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<BaseResponse<TokenResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
+        TokenResponse response = authService.refreshToken(request.getRefreshToken());
+        return ResponseEntity.ok(BaseResponse.data(response));
     }
 }
