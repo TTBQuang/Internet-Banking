@@ -5,8 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class LoginRequest {
-    private String username;
-    private String password;
-    private String recaptchaToken;
+public class RefreshTokenRequest {
+    private String refreshToken;
 }

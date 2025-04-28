@@ -45,6 +45,12 @@ public class GlobalExceptionHandler {
                 .body(BaseResponse.message(ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidRecaptchaException.class)
+    public ResponseEntity<BaseResponse<Object>> handleInvalidRecaptchaException(InvalidRecaptchaException ex) {
+        BaseResponse<Object> response = BaseResponse.message(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse<Void>> handleGenericException(Exception ex) {
         logger.error("Unhandled exception occurred", ex);

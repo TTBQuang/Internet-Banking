@@ -1,4 +1,12 @@
 package com.wnc.internet_banking.dto.response.auth;
 
-public record LoginResponse(String accessToken, String refreshToken) {
+import com.wnc.internet_banking.dto.response.user.UserDto;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class LoginResponse {
+    private TokenResponse token;
+    private UserDto user;
 }
