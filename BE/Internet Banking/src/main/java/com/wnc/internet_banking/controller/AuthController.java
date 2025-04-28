@@ -46,7 +46,7 @@ public class AuthController {
         return ResponseEntity.ok(BaseResponse.message("Password changed successfully"));
     }
 
-    @PostMapping("/refresh-token")
+    @PostMapping("/refresh")
     public ResponseEntity<BaseResponse<TokenResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
         TokenResponse response = authService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(BaseResponse.data(response));

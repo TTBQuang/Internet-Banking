@@ -24,7 +24,7 @@ public class JwtUtil {
     private String secretKeyString;
 
     private SecretKey secretKey;
-    private static final long ACCESS_TOKEN_EXPIRATION = 15 * 60 * 1000;
+    private static final long ACCESS_TOKEN_EXPIRATION = 1 * 10 * 1000;
 
     @PostConstruct
     public void init() {

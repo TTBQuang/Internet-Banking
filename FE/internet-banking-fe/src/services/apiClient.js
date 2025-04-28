@@ -4,7 +4,7 @@ import { logout } from "../redux/userSlice";
 
 const BASE_URL = "http://localhost:8080";
 
-// Tạo instance axios với cấu hình chung
+// Create an axios instance with common configuration
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -12,83 +12,101 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor - tự động thêm token vào header
+// Request interceptor - automatically add token to headers
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
+
+    // Check if token is needed
+    if (config.withToken !== false && token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor - xử lý refresh token và lỗi chung
+// Response interceptor
 apiClient.interceptors.response.use(
   (response) => {
-    // Chỉ trả về data.data từ response để đơn giản hoá
-    return response.data?.data || response.data;
+    if (response.data) {
+      if (response.data.data) {
+        return response.data.data;
+      }
+      if (response.data.message) {
+        return { message: response.data.message };
+      }
+    }
+
+    return response;
   },
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 (Unauthorized) và chưa thử refresh token
+    // If 401 error and not yet retried
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        // Thử refresh token
         const refreshToken = localStorage.getItem("refreshToken");
         if (!refreshToken) {
-          // Nếu không có refresh token, logout
-          store.dispatch(logout());
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          return Promise.reject(new Error("Phiên đăng nhập hết hạn"));
+          handleLogout();
+          return Promise.reject(new Error("Session expired"));
         }
 
-        // Gọi API refresh token
-        const response = await axios.post(`${BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
+        // Call refresh API (still using axios to avoid nested interceptors)
+        const refreshRes = await axios.post(
+          `${BASE_URL}/auth/refresh`,
+          {
+            refreshToken,
+          },
+          { withToken: false }
+        );
+        const { accessToken, refreshToken: newRefreshToken } =
+          refreshRes.data.data;
 
-        if (response.data?.data?.token) {
-          const { accessToken, refreshToken: newRefreshToken } =
-            response.data.data.token;
-          // Lưu token mới
+        if (accessToken && newRefreshToken) {
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", newRefreshToken);
 
-          // Cập nhật header cho request ban đầu và thử lại
+          // Add header and retry the original request
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return axios(originalRequest);
+          return apiClient(originalRequest);
+        } else {
+          handleLogout();
+          return Promise.reject(new Error("Invalid refresh response"));
         }
-      } catch {
-        // Nếu refresh token thất bại, logout
-        store.dispatch(logout());
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        return Promise.reject(
-          new Error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại")
-        );
+      } catch (refreshError) {
+        console.error("Refresh token error:", refreshError);
+        handleLogout();
+        return Promise.reject(new Error("Session expired, please login again"));
       }
     }
 
-    // Xử lý thông báo lỗi
+    // Handle other errors
     const errorMessage =
-      error.response?.data?.message || error.message || "Đã có lỗi xảy ra";
+      error.response?.data?.message || error.message || "An error occurred";
     return Promise.reject(new Error(errorMessage));
   }
 );
 
+// Helper function to handle logout consistently
+const handleLogout = () => {
+  store.dispatch(logout());
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+};
+
 export default {
-  get: (endpoint, config = {}) => apiClient.get(endpoint, config),
+  get: (endpoint, config = {}) =>
+    apiClient.get(endpoint, { ...config, withToken: true }),
   post: (endpoint, data = {}, config = {}) =>
-    apiClient.post(endpoint, data, config),
+    apiClient.post(endpoint, data, { ...config, withToken: true }),
   put: (endpoint, data = {}, config = {}) =>
-    apiClient.put(endpoint, data, config),
-  delete: (endpoint, config = {}) => apiClient.delete(endpoint, config),
+    apiClient.put(endpoint, data, { ...config, withToken: true }),
+  delete: (endpoint, config = {}) =>
+    apiClient.delete(endpoint, { ...config, withToken: true }),
   patch: (endpoint, data = {}, config = {}) =>
-    apiClient.patch(endpoint, data, config),
+    apiClient.patch(endpoint, data, { ...config, withToken: true }),
 };

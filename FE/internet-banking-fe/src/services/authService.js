@@ -1,21 +1,28 @@
 import apiClient from "./apiClient";
-import { store } from "../redux/store";
-import { setUser, logout } from "../redux/userSlice";
 
-export const loginUser = async (username, password) => {
-  const data = await apiClient.post("/auth/login", { username, password });
+export const login = async (credentials) => {
+  const response = await apiClient.post("/auth/login", credentials, {
+    withToken: false,
+  });
 
-  localStorage.setItem("accessToken", data.token.accessToken);
-  localStorage.setItem("refreshToken", data.token.refreshToken);
+  if (response.token.accessToken && response.token.refreshToken) {
+    localStorage.setItem("accessToken", response.token.accessToken);
+    localStorage.setItem("refreshToken", response.token.refreshToken);
+  }
 
-  store.dispatch(setUser(data.user));
-
-  return data;
+  return response;
 };
 
-export const logoutUser = () => {
-  apiClient.post("/auth/logout");
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  store.dispatch(logout());
+export const logout = async () => {
+  try {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (refreshToken) {
+      await apiClient.post("/auth/logout", { refreshToken });
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+  } finally {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+  }
 };

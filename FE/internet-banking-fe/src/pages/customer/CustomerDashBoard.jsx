@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/userSlice";
 import { fetchAccount } from "../../redux/accountSlice";
@@ -8,9 +8,9 @@ const CustomerDashBoard = () => {
   const accountState = useSelector((state) => state.account);
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  const handleFetchAccount = () => {
     dispatch(fetchAccount());
-  }, [dispatch]);
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -22,6 +22,8 @@ const CustomerDashBoard = () => {
       <p>{user.fullName}</p>
       <p>{user.email}</p>
       <p>{user.role}</p>
+
+      <button onClick={handleFetchAccount}>Fetch Account Info</button>
 
       {accountState.loading && <p>Loading account...</p>}
       {accountState.account && (
