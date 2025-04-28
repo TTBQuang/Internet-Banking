@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../redux/userSlice";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginPage = () => {
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const recaptchaRef = useRef(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -31,6 +36,19 @@ const LoginPage = () => {
     }
   }, [role, navigate]);
 
+  // Handle reCAPTCHA change
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
+  // Reset reCAPTCHA
+  const resetCaptcha = () => {
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset();
+    }
+    setCaptchaToken("");
+  };
+
   // Handler when the user submits the login form
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -42,15 +60,29 @@ const LoginPage = () => {
       return;
     }
 
+    // Validate reCAPTCHA
+    if (!captchaToken) {
+      setError("Please complete the reCAPTCHA verification");
+      return;
+    }
+
     // Call the login action
     try {
-      const resultAction = dispatch(loginUser({ username, password }));
+      const resultAction = await dispatch(
+        loginUser({
+          username,
+          password,
+          recaptchaToken: captchaToken,
+        })
+      );
 
       if (loginUser.rejected.match(resultAction)) {
         setError(resultAction.payload || "Login failed");
+        resetCaptcha();
       }
     } catch (e) {
       setError(e.message || "An unexpected error occurred");
+      resetCaptcha();
     }
   };
 
@@ -84,6 +116,15 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
             autoComplete="current-password"
+          />
+        </div>
+
+        <div className="recaptcha-container">
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={RECAPTCHA_SITE_KEY}
+            onChange={handleCaptchaChange}
+            hl="en"
           />
         </div>
 

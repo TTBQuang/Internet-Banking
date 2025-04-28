@@ -27,7 +27,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<BaseResponse<LoginResponse>> loginUser(@RequestBody LoginRequest request) {
-        LoginResponse response = authService.loginUser(request.getUsername(), request.getPassword());
+        LoginResponse response = authService.loginUser(
+                request.getUsername(),
+                request.getPassword(),
+                request.getRecaptchaToken()
+        );
         return ResponseEntity.ok(BaseResponse.data(response));
     }
 
