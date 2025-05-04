@@ -3,19 +3,22 @@ package com.wnc.internet_banking.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-@Table(name = "recipients")
 @Setter
 @Getter
+@Entity
+@Table(name = "recipients")
 public class Recipient {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "recipient_id", updatable = false, nullable = false)
+    @GeneratedValue
+    @UuidGenerator
+    @Column(name = "recipient_id")
     private UUID recipientId;
 
     @ManyToOne
@@ -32,7 +35,8 @@ public class Recipient {
     @JoinColumn(name = "bank_code", referencedColumnName = "bank_code")
     private LinkedBank bank;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }
 

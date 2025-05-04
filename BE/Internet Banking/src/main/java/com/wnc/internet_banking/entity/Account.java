@@ -1,26 +1,33 @@
 package com.wnc.internet_banking.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "accounts")
-@Getter
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "account_id", updatable = false, nullable = false)
+    @GeneratedValue
+    @UuidGenerator
+    @Column(name = "account_id")
     private UUID accountId;
 
+    @NotNull
     @Column(name = "account_number", nullable = false, unique = true)
     private String accountNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false)
-    private double balance;
+    @NotNull
+    @Column(name = "balance", nullable = false)
+    private Double balance;
 }
