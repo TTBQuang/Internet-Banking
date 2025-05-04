@@ -1,16 +1,26 @@
 package com.wnc.internet_banking.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
+@Getter
+@Setter
 @Entity
 @Table(name = "debt_reminders")
 public class DebtReminder {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "debt_reminder_id", updatable = false, nullable = false)
+    @GeneratedValue
+    @UuidGenerator
+    @Column(name = "debt_reminder_id")
     private UUID debtReminderId;
 
     @ManyToOne
@@ -18,21 +28,25 @@ public class DebtReminder {
     private User creditor;
 
     @ManyToOne
-    @JoinColumn(name = "debtor_account_number", referencedColumnName = "account_number")
+    @JoinColumn(name = "debtor_account_number", referencedColumnName = "account_number", nullable = false)
     private Account debtorAccount;
 
-    @Column(nullable = false)
-    private double amount;
+    @NotNull
+    @Column(name = "amount", nullable = false)
+    private Double amount;
 
-    @Column(nullable = false)
+    @NotNull
+    @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
+    @ColumnDefault("'PENDING'")
     private Status status = Status.PENDING;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
