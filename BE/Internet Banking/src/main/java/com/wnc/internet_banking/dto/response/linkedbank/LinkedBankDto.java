@@ -1,4 +1,4 @@
-package com.wnc.internet_banking.dto.response.linked_bank;
+package com.wnc.internet_banking.dto.response.linkedbank;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

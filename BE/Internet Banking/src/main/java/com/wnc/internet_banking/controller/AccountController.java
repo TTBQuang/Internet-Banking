@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequestMapping("/account")
 @AllArgsConstructor
 public class AccountController {
-    private AccountService accountService;
+    private final AccountService accountService;
 
     @GetMapping
     public ResponseEntity<BaseResponse<AccountDto>> getAccountByUserId() {
