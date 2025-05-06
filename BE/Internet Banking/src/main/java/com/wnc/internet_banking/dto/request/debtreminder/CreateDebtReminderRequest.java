@@ -5,10 +5,12 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class CreateDebtReminderRequest {
-    private String debtorAccountNumber;
+    private UUID debtorAccountId;
 
     @Positive
     private Double amount;

@@ -11,10 +11,6 @@ public class InternetBankingApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(InternetBankingApplication.class, args);
-
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashed = encoder.encode("123456");
-        System.out.println("Hashed password for '123456': " + hashed);
     }
 
 }

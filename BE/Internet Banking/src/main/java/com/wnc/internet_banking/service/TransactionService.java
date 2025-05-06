@@ -40,8 +40,8 @@ public class TransactionService {
 
     // Create transaction object and send otp
     private Transaction createTransactionAndSendOtp(
-            String senderAccountNumber,
-            String receiverAccountNumber,
+            UUID senderAccountId,
+            UUID receiverAccountId,
             Double amount,
             String content,
             Transaction.Type transactionType,
@@ -50,10 +50,10 @@ public class TransactionService {
         User sender = userRepository.findById(senderUserId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Account senderAccount = accountRepository.findByAccountNumberAndUser(senderAccountNumber, sender)
+        Account senderAccount = accountRepository.findByAccountIdAndUser(senderAccountId, sender)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sender account"));
 
-        Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber)
+        Account receiverAccount = accountRepository.findById(receiverAccountId)
                 .orElseThrow(() -> new IllegalArgumentException("Receiver account not found"));
 
         // Check if the sender and receiver accounts are different
@@ -127,8 +127,8 @@ public class TransactionService {
 
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                internalTransferRequest.getSenderAccountNumber(),
-                internalTransferRequest.getReceiverAccountNumber(),
+                internalTransferRequest.getSenderAccountId(),
+                internalTransferRequest.getReceiverAccountId(),
                 internalTransferRequest.getAmount(),
                 internalTransferRequest.getContent(),
                 Transaction.Type.MONEY_TRANSFER,
@@ -157,8 +157,8 @@ public class TransactionService {
 
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                debtPaymentRequest.getDebtorAccountNumber(),
-                debtPaymentRequest.getCreditorAccountNumber(),
+                debtPaymentRequest.getDebtorAccountId(),
+                debtPaymentRequest.getCreditorAccountId(),
                 debtReminderDto.getAmount(),
                 debtPaymentRequest.getContent(),
                 Transaction.Type.DEBT_PAYMENT,

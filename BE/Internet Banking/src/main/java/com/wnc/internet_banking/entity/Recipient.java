@@ -36,7 +36,7 @@ public class Recipient {
     private String nickname;
 
     @ManyToOne
-    @JoinColumn(name = "bank_code", referencedColumnName = "bank_code")
+    @JoinColumn(name = "bank_id", referencedColumnName = "linked_bank_id")
     private LinkedBank bank;
 
     @CreationTimestamp

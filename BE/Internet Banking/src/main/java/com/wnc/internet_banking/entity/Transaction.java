@@ -29,14 +29,14 @@ public class Transaction {
     private String senderAccountNumber;
 
     @ManyToOne
-    @JoinColumn(name = "sender_bank_code", referencedColumnName = "bank_code")
+    @JoinColumn(name = "sender_bank_id", referencedColumnName = "linked_bank_id")
     private LinkedBank senderBank;
 
     @Column(name = "receiver_account_number")
     private String receiverAccountNumber;
 
     @ManyToOne
-    @JoinColumn(name = "receiver_bank_code", referencedColumnName = "bank_code")
+    @JoinColumn(name = "receiver_bank_id", referencedColumnName = "linked_bank_id")
     private LinkedBank receiverBank;
 
     @NotNull

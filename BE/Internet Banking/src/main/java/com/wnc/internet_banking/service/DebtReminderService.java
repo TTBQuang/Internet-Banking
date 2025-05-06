@@ -45,7 +45,7 @@ public class DebtReminderService {
         User creditor = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Account debtorAccount = accountRepository.findByAccountNumber(createDebtReminderRequest.getDebtorAccountNumber())
+        Account debtorAccount = accountRepository.findById(createDebtReminderRequest.getDebtorAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("Debtor account not found"));
 
         // Create Debt reminder
