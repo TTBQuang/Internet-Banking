@@ -1,7 +1,10 @@
 package com.wnc.internet_banking.service;
 
+import com.wnc.internet_banking.dto.request.transaction.ConfirmDebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionRequest;
+import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
+import com.wnc.internet_banking.dto.response.debtreminder.DebtReminderDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.Otp;
 import com.wnc.internet_banking.entity.Transaction;
@@ -11,7 +14,6 @@ import com.wnc.internet_banking.repository.TransactionRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,15 +34,24 @@ public class TransactionService {
 
     private final EmailService emailService;
 
-    @Transactional
-    public UUID initiateInternalTransfer(InternalTransferRequest internalTransferRequest, UUID userId) {
-        User sender = userRepository.findById(userId)
+    private final DebtReminderService debtReminderService;
+
+    // Create transaction object and send otp
+    private Transaction createTransactionAndSendOtp(
+            String senderAccountNumber,
+            String receiverAccountNumber,
+            Double amount,
+            String content,
+            Transaction.Type transactionType,
+            UUID senderUserId
+    ) {
+        User sender = userRepository.findById(senderUserId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Account senderAccount = accountRepository.findByAccountNumberAndUser(internalTransferRequest.getSenderAccountNumber(), sender)
+        Account senderAccount = accountRepository.findByAccountNumberAndUser(senderAccountNumber, sender)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sender account"));
 
-        Account receiverAccount = accountRepository.findByAccountNumber(internalTransferRequest.getReceiverAccountNumber())
+        Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber)
                 .orElseThrow(() -> new IllegalArgumentException("Receiver account not found"));
 
         // Check if the sender and receiver accounts are different
@@ -48,38 +59,33 @@ public class TransactionService {
             throw new IllegalArgumentException("Sender and receiver accounts cannot be the same");
         }
 
-        // Create new transaction
         Transaction transaction = Transaction.builder()
                 .senderAccountNumber(senderAccount.getAccountNumber())
                 .receiverAccountNumber(receiverAccount.getAccountNumber())
-                .amount(internalTransferRequest.getAmount())
+                .amount(amount)
                 .fee(0.0)
                 .feePayer(Transaction.FeePayer.SENDER)
-                .content(internalTransferRequest.getContent())
-                .type(Transaction.Type.MONEY_TRANSFER)
+                .content(content)
+                .type(transactionType)
                 .status(Transaction.Status.PENDING)
                 .build();
 
         transactionRepository.save(transaction);
 
         // Send OTP to sender's email
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Otp otp = otpService.generateOtp(user.getUserId(), Otp.Purpose.TRANSACTION);
-
+        Otp otp = otpService.generateOtp(senderUserId, Otp.Purpose.TRANSACTION);
         try {
-            emailService.sendEmail(user.getEmail(), "Transaction confirmation", "Your OTP is: " + otp.getOtpCode());
+            emailService.sendEmail(sender.getEmail(), "Transaction confirmation", "Your OTP is: " + otp.getOtpCode());
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send email");
         }
 
-        return transaction.getTransactionId();
+        return transaction;
     }
 
-    @Transactional
-    public void confirmInternalTransfer(UUID transactionId, ConfirmTransactionRequest confirmTransactionRequest, UUID userId) {
-        if(!otpService.verifyOtp(userId, confirmTransactionRequest.getOtpCode(), Otp.Purpose.TRANSACTION)) {
+
+    public void confirmTransaction(UUID transactionId, String otpCode, UUID userId) {
+        if(!otpService.verifyOtp(userId, otpCode, Otp.Purpose.TRANSACTION)) {
             throw new IllegalArgumentException("Invalid OTP");
         }
 
@@ -112,5 +118,63 @@ public class TransactionService {
         accountRepository.save(senderAccount);
         accountRepository.save(receiverAccount);
         transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public UUID initiateInternalTransfer(InternalTransferRequest internalTransferRequest, UUID userId) {
+
+        // Create new transaction and send otp
+        Transaction transaction = createTransactionAndSendOtp(
+                internalTransferRequest.getSenderAccountNumber(),
+                internalTransferRequest.getReceiverAccountNumber(),
+                internalTransferRequest.getAmount(),
+                internalTransferRequest.getContent(),
+                Transaction.Type.MONEY_TRANSFER,
+                userId
+        );
+
+        return transaction.getTransactionId();
+    }
+
+    @Transactional
+    public void confirmInternalTransfer(UUID transactionId, ConfirmTransactionRequest confirmTransactionRequest, UUID userId) {
+        confirmTransaction(transactionId, confirmTransactionRequest.getOtpCode(), userId);
+    }
+
+    @Transactional
+    public UUID initiateDebtPayment(
+            DebtPaymentRequest debtPaymentRequest,
+            UUID userId
+    ) {
+        // Check if Debt Reminder is already paid
+        if (debtReminderService.isDebtReminderAlreadyPaid(debtPaymentRequest.getDebtReminderId())) {
+            throw new IllegalArgumentException("Debt reminder already paid");
+        }
+
+        DebtReminderDto debtReminderDto = debtReminderService.getDebtReminderById(debtPaymentRequest.getDebtReminderId());
+
+        // Create new transaction and send otp
+        Transaction transaction = createTransactionAndSendOtp(
+                debtPaymentRequest.getDebtorAccountNumber(),
+                debtPaymentRequest.getCreditorAccountNumber(),
+                debtReminderDto.getAmount(),
+                debtPaymentRequest.getContent(),
+                Transaction.Type.DEBT_PAYMENT,
+                userId
+        );
+
+        return transaction.getTransactionId();
+    }
+
+    @Transactional
+    public void confirmDebtPayment(
+            UUID transactionId,
+            ConfirmDebtPaymentRequest confirmDebtPaymentRequest,
+            UUID userId
+    ) {
+        confirmTransaction(transactionId, confirmDebtPaymentRequest.getOtpCode(), userId);
+
+        // Set Debt Reminder status to PAID
+        debtReminderService.confirmDebtPayment(confirmDebtPaymentRequest.getDebtReminderId());
     }
 }

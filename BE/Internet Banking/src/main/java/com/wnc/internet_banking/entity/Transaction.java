@@ -2,9 +2,7 @@ package com.wnc.internet_banking.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
@@ -15,6 +13,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -29,7 +29,7 @@ public class Transaction {
     private String senderAccountNumber;
 
     @ManyToOne
-    @JoinColumn(name = "sender_bank_code", referencedColumnName = "bank_code", nullable = false)
+    @JoinColumn(name = "sender_bank_code", referencedColumnName = "bank_code")
     private LinkedBank senderBank;
 
     @Column(name = "receiver_account_number")

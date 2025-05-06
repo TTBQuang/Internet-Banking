@@ -1,6 +1,8 @@
 package com.wnc.internet_banking.controller;
 
+import com.wnc.internet_banking.dto.request.transaction.ConfirmDebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionRequest;
+import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.service.TransactionService;
@@ -20,7 +22,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/internal-transfers")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<UUID>> initiateInternalTransfer (
             @RequestBody InternalTransferRequest internalTransferRequest
     ) {
@@ -31,8 +33,8 @@ public class TransactionController {
        return ResponseEntity.ok(BaseResponse.data(transactionId));
     }
 
-    @PostMapping("/internal-transfers/confirm/{transactionId}")
-    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/internal-transfers/{transactionId}/confirm")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<?>> confirmInternalTransfer (
             @PathVariable UUID transactionId,
             @RequestBody ConfirmTransactionRequest confirmTransactionRequest
@@ -40,6 +42,31 @@ public class TransactionController {
         UUID userId = SecurityUtil.getCurrentUserId();
 
         transactionService.confirmInternalTransfer(transactionId, confirmTransactionRequest, userId);
+
+        return ResponseEntity.ok(BaseResponse.message("Transaction confirmed successfully"));
+    }
+
+    @PostMapping("/debt-payments")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<UUID>> initiateDebtPayment (
+            @RequestBody DebtPaymentRequest debtPaymentRequest
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        UUID transactionId = transactionService.initiateDebtPayment(debtPaymentRequest, userId);
+
+        return ResponseEntity.ok(BaseResponse.data(transactionId));
+    }
+
+    @PostMapping("/debt-payments/{transactionId}/confirm")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<?>> confirmDebtPayment (
+            @PathVariable UUID transactionId,
+            @RequestBody ConfirmDebtPaymentRequest confirmDebtPaymentRequest
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        transactionService.confirmDebtPayment(transactionId, confirmDebtPaymentRequest, userId);
 
         return ResponseEntity.ok(BaseResponse.message("Transaction confirmed successfully"));
     }

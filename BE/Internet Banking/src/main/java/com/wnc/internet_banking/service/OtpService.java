@@ -26,7 +26,7 @@ public class OtpService {
         otpRepository.deactivateActiveOtps(userId, purpose, LocalDateTime.now());
 
         String otpCode = String.valueOf((int) (Math.random() * 900000) + 100000);
-        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(1);
+        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(5);
 
         Otp otp = new Otp();
         otp.setUser(user);
