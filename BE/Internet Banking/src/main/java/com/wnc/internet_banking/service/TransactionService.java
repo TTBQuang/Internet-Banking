@@ -17,6 +17,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -176,5 +178,10 @@ public class TransactionService {
 
         // Set Debt Reminder status to PAID
         debtReminderService.confirmDebtPayment(confirmDebtPaymentRequest.getDebtReminderId());
+    }
+
+    public List<Transaction> getTransactionHistory(String accountNumber) {
+        return transactionRepository.findBySenderAccountNumberOrReceiverAccountNumber(accountNumber, accountNumber);
+
     }
 }

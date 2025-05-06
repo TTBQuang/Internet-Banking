@@ -5,6 +5,7 @@ import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionReques
 import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
+import com.wnc.internet_banking.entity.Transaction;
 import com.wnc.internet_banking.service.TransactionService;
 import com.wnc.internet_banking.util.SecurityUtil;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -20,6 +22,23 @@ import java.util.UUID;
 @RequestMapping("/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
+
+    @GetMapping("/histories/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<List<Transaction>>> getTransactionHistoryForCustomer(
+            @RequestParam String accountNumber) {
+        List<Transaction> transactions = transactionService.getTransactionHistory(accountNumber);
+        return ResponseEntity.ok(BaseResponse.data(transactions));
+    }
+
+    @GetMapping("/histories")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<BaseResponse<List<Transaction>>> getTransactionHistoryForEmployee(
+            @RequestParam String accountNumber) {
+        List<Transaction> transactions = transactionService.getTransactionHistory(accountNumber);
+        return ResponseEntity.ok(BaseResponse.data(transactions));
+    }
+
 
     @PostMapping("/internal-transfers")
     @PreAuthorize("hasRole('CUSTOMER')")

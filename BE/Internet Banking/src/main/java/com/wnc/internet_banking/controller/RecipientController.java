@@ -23,6 +23,7 @@ public class RecipientController {
     private final RecipientService recipientService;
 
     @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<RecipientDto>> createRecipient(@RequestBody RecipientCreateRequest request) {
         UUID userId = SecurityUtil.getCurrentUserId();
         RecipientDto savedRecipient = recipientService.addRecipient(userId, request);
@@ -30,13 +31,14 @@ public class RecipientController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name)")
+    @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name) and hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<Void>> deleteRecipient(@PathVariable UUID id) {
         recipientService.deleteRecipient(id);
         return ResponseEntity.ok(BaseResponse.message("Recipient deleted successfully"));
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<Page<RecipientDto>>> getRecipients(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -47,7 +49,7 @@ public class RecipientController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name)")
+    @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name) and hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<RecipientDto>> updateRecipientNickname(
             @PathVariable UUID id,
             @Valid @RequestBody RecipientUpdateRequest request
