@@ -37,8 +37,8 @@ public class RecipientService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        boolean exists = recipientRepository.existsByOwnerUserIdAndAccountNumberAndBankBankCode(
-                userId, request.getAccountNumber(), request.getBankCode()
+        boolean exists = recipientRepository.existsByOwnerUserIdAndAccountNumberAndBankLinkedBankId(
+                userId, request.getAccountNumber(), request.getBankId()
         );
         if (exists) {
             throw new IllegalArgumentException("Recipient already exists");
@@ -49,7 +49,7 @@ public class RecipientService {
         recipient.setAccountNumber(request.getAccountNumber());
         recipient.setCreatedAt(LocalDateTime.now());
 
-        if (request.getBankCode() == null) {
+        if (request.getBankId() == null) {
             Optional<User> recipientUser = accountRepository.findByAccountNumber(request.getAccountNumber())
                     .map(Account::getUser);
             if (recipientUser.isPresent()) {
@@ -58,7 +58,7 @@ public class RecipientService {
                 throw new IllegalArgumentException("Recipient user not found");
             }
         } else {
-            LinkedBank bank = linkedBankRepository.findByBankCode(request.getBankCode())
+            LinkedBank bank = linkedBankRepository.findById(request.getBankId())
                     .orElseThrow(() -> new IllegalArgumentException("Bank not found"));
             recipient.setBank(bank);
             recipient.setNickname(request.getNickname() != null ? request.getNickname() : request.getFullName());

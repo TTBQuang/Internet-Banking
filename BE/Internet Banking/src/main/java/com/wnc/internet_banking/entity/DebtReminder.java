@@ -30,7 +30,7 @@ public class DebtReminder {
     private User creditor;
 
     @ManyToOne
-    @JoinColumn(name = "debtor_account_number", referencedColumnName = "account_number", nullable = false)
+    @JoinColumn(name = "debtor_account_id", referencedColumnName = "account_id", nullable = false)
     private Account debtorAccount;
 
     @NotNull

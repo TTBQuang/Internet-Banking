@@ -14,9 +14,14 @@ import java.util.UUID;
 @NoArgsConstructor
 public class RecipientDto {
     private UUID recipientId;
+
     private UserDto owner;
+
     private String accountNumber;
+
     private String nickname;
+
     private LinkedBankDto bank;
+
     private LocalDateTime createdAt;
 }

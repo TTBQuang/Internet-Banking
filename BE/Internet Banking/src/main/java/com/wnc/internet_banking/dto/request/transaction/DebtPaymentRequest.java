@@ -11,9 +11,9 @@ import java.util.UUID;
 @Builder
 public class DebtPaymentRequest {
 
-    private String debtorAccountNumber;
+    private UUID debtorAccountId;
 
-    private String creditorAccountNumber;
+    private UUID creditorAccountId;
 
     private String content;
 
