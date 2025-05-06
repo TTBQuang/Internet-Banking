@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequestMapping("/account")
 @AllArgsConstructor
 public class AccountController {
-    private AccountService accountService;
+    private final AccountService accountService;
 
     @GetMapping
     @PreAuthorize("hasRole('CUSTOMER')")

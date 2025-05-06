@@ -1,6 +1,6 @@
 package com.wnc.internet_banking.dto.response.recipient;
 
-import com.wnc.internet_banking.dto.response.linked_bank.LinkedBankDto;
+import com.wnc.internet_banking.dto.response.linkedbank.LinkedBankDto;
 import com.wnc.internet_banking.dto.response.user.UserDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
