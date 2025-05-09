@@ -19,7 +19,7 @@ public class EmailService {
 
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setText(text);
+        helper.setText(text, true);
 
         javaMailSender.send(message);
     }
