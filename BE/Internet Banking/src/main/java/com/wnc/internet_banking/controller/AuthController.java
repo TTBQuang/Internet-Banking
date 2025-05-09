@@ -1,8 +1,7 @@
 package com.wnc.internet_banking.controller;
 
-import com.wnc.internet_banking.dto.request.auth.ChangePasswordRequest;
-import com.wnc.internet_banking.dto.request.auth.LoginRequest;
-import com.wnc.internet_banking.dto.request.auth.RefreshTokenRequest;
+import com.wnc.internet_banking.dto.request.auth.*;
+import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.auth.LoginResponse;
 import com.wnc.internet_banking.dto.response.auth.TokenResponse;
@@ -11,6 +10,7 @@ import com.wnc.internet_banking.util.SecurityUtil;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,5 +54,19 @@ public class AuthController {
     public ResponseEntity<BaseResponse<TokenResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
         TokenResponse response = authService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(BaseResponse.data(response));
+    }
+
+    @PostMapping("/password-reset/initiate")
+    public ResponseEntity<BaseResponse<UUID>> initiateInternalTransfer (
+            @RequestBody PasswordResetRequest passwordResetRequest
+    ) {
+        UUID userId = authService.initiatePasswordReset(passwordResetRequest.getEmail());
+        return ResponseEntity.ok(BaseResponse.data(userId));
+    }
+
+    @PostMapping("/password-reset/verify")
+    public ResponseEntity<BaseResponse<Void>> verifyPasswordReset(@RequestBody PasswordResetConfirmRequest request) {
+        authService.verifyPasswordReset(UUID.fromString(request.getUserId()), request.getOtp(), request.getNewPassword());
+        return ResponseEntity.ok(BaseResponse.message("Reset password successfully"));
     }
 }
