@@ -31,12 +31,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => {
     if (response.data) {
-      if (response.data.data) {
-        return response.data.data;
-      }
-      if (response.data.message) {
-        return { message: response.data.message };
-      }
+      return response.data;
     }
 
     return response;

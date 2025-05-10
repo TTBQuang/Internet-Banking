@@ -6,7 +6,7 @@ export const fetchAccount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const data = await getAccount();
-      return data;
+      return data.data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
