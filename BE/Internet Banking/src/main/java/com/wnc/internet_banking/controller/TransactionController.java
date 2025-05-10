@@ -8,7 +8,6 @@ import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.entity.Transaction;
 import com.wnc.internet_banking.service.TransactionService;
 import com.wnc.internet_banking.util.SecurityUtil;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
