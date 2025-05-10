@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-@Service
+@Service("otpService")
 public class OtpServiceImpl implements OtpService {
 
     private final OtpRepository otpRepository;

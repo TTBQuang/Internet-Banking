@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-@Service
+@Service("transactionService")
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;

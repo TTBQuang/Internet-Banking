@@ -7,7 +7,6 @@ import com.wnc.internet_banking.dto.response.recipient.RecipientDto;
 import com.wnc.internet_banking.service.RecipientService;
 import com.wnc.internet_banking.util.SecurityUtil;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

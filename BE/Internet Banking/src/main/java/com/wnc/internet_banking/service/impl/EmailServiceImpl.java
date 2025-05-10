@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
-@Service
+@Service("emailService")
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;

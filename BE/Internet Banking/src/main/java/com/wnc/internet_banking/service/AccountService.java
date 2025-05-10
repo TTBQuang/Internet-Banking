@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface AccountService {
     AccountDto getAccountByUserId(UUID userId);
+
     Account createAccountForUser(User user);
+
     Account deposit(String accountNumber, double amount);
 }

@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
-@Service
+@Service("userService")
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;

@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
+@Service("recipientService")
 @AllArgsConstructor
 public class RecipientServiceImpl implements RecipientService {
     private final RecipientRepository recipientRepository;
@@ -89,7 +89,7 @@ public class RecipientServiceImpl implements RecipientService {
     @Override
     public Page<RecipientDto> getRecipientsByUser(UUID userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Recipient> recipients = recipientRepository.findByOwnerUserId(userId, pageable);
+        Page<Recipient> recipients = recipientRepository.findByOwner_UserId(userId, pageable);
         return recipients.map(recipient -> modelMapper.map(recipient, RecipientDto.class));
     }
 
@@ -104,4 +104,5 @@ public class RecipientServiceImpl implements RecipientService {
 
         return modelMapper.map(updatedRecipient, RecipientDto.class);
     }
+
 }

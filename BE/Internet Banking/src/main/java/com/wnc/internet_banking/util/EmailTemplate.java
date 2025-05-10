@@ -32,4 +32,48 @@ public class EmailTemplate {
                     </html>
                 """, fullName, otpCode);
     }
+
+    public static String notifyDebtPaymentCompleted(String creditorFullName, String debtorFullName, Double amount) {
+        return String.format("""
+                <html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                        <p>Dear %s,</p>
+        
+                        <p>We are pleased to inform you that the debt payment of %.2fVND from %s has been successfully completed.</p>
+        
+                        <p>The payment has been transferred to your account, and the debt reminder has been marked as paid.</p>
+                    </body>
+                </html>
+            """, creditorFullName, amount, debtorFullName);
+    }
+
+    public static String notifyDebtReminderCancelledToDebtor(String debtorFullName, String creditorFullName, String content) {
+        return String.format("""
+            <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <p>Dear %s,</p>
+
+                    <p>The debt reminder sent by %s to you has been cancelled. Please take a look at the content:</p>
+
+                    <p><strong>%s</strong></p>
+                </body>
+            </html>
+        """, debtorFullName, creditorFullName, content);
+    }
+
+    public static String notifyDebtReminderCancelledToCreditor(String creditorFullName, String debtorFullName, String content) {
+        return String.format("""
+            <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <p>Dear %s,</p>
+
+                    <p>The debt reminder you sent to %s has been cancelled. Please take a look at the content:</p>
+
+                    <p><strong>%s</strong></p>
+                </body>
+            </html>
+        """, creditorFullName, debtorFullName, content);
+    }
+
+
 }

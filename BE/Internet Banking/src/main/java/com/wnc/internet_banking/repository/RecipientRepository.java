@@ -11,6 +11,6 @@ import java.util.UUID;
 @Repository
 public interface RecipientRepository extends JpaRepository<Recipient, UUID> {
     boolean existsByOwnerUserIdAndAccountNumberAndBankLinkedBankId(UUID ownerId, String accountNumber, UUID bankId);
-    Page<Recipient> findByOwnerUserId(UUID ownerId, Pageable pageable);
+    Page<Recipient> findByOwner_UserId(UUID ownerUserId, Pageable pageable);
 }
 

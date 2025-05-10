@@ -11,7 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 
-@Service
+@Service("recaptchaService")
 @RequiredArgsConstructor
 public class RecaptchaServiceImpl implements RecaptchaService {
     private final RecaptchaConfig recaptchaConfig;
