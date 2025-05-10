@@ -24,7 +24,6 @@ public class AccountController {
     public ResponseEntity<BaseResponse<AccountDto>> getAccountByUserId() {
         UUID userId = SecurityUtil.getCurrentUserId();
         AccountDto accountDTO = accountService.getAccountByUserId(userId);
-        throw new RuntimeException("Test exception");
-//        return ResponseEntity.ok(BaseResponse.data(accountDTO));
+        return ResponseEntity.ok(BaseResponse.data(accountDTO));
     }
 }
