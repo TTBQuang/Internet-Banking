@@ -1,7 +1,6 @@
 package com.wnc.internet_banking.controller;
 
 import com.wnc.internet_banking.dto.request.auth.*;
-import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.auth.LoginResponse;
 import com.wnc.internet_banking.dto.response.auth.TokenResponse;
@@ -10,7 +9,6 @@ import com.wnc.internet_banking.util.SecurityUtil;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

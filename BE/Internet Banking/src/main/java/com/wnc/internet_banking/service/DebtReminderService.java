@@ -1,71 +1,28 @@
 package com.wnc.internet_banking.service;
 
+import com.wnc.internet_banking.dto.request.debtreminder.CancelDebtReminderRequest;
 import com.wnc.internet_banking.dto.request.debtreminder.CreateDebtReminderRequest;
 import com.wnc.internet_banking.dto.response.debtreminder.DebtReminderDto;
-import com.wnc.internet_banking.entity.Account;
-import com.wnc.internet_banking.entity.DebtReminder;
-import com.wnc.internet_banking.entity.User;
-import com.wnc.internet_banking.repository.AccountRepository;
-import com.wnc.internet_banking.repository.DebtReminderRepository;
-import com.wnc.internet_banking.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-@RequiredArgsConstructor
-@Service
-public class DebtReminderService {
+public interface DebtReminderService {
+    boolean isDebtReminderAlreadyPaid(UUID debtReminderId);
 
-    private final DebtReminderRepository debtReminderRepository;
+    void confirmDebtPayment(UUID debtReminderID);
 
-    private final UserRepository userRepository;
+    DebtReminderDto createDebtReminder(CreateDebtReminderRequest createDebtReminderRequest, UUID userId);
 
-    private final AccountRepository accountRepository;
+    boolean isDebtReminderOwner(UUID debtReminderId, String userId);
 
-    private final ModelMapper modelMapper;
+    DebtReminderDto getDebtReminderById(UUID debtReminderId);
 
+    Page<DebtReminderDto> getDebtRemindersByUser(UUID userId, int page, int size);
 
-    public boolean isDebtReminderAlreadyPaid(UUID debtReminderId) {
-        return debtReminderRepository.existsByDebtReminderIdAndStatus(debtReminderId, DebtReminder.Status.PAID);
-    }
+    Page<DebtReminderDto> getReceivedDebtRemindersByUser(UUID userId, int page, int size);
 
-    public void confirmDebtPayment(UUID debtReminderID) {
-        DebtReminder debtReminder = debtReminderRepository.findById(debtReminderID)
-                .orElseThrow(() -> new IllegalArgumentException("Debt reminder not found"));
+    void cancelDebtReminder(UUID debtReminderId, CancelDebtReminderRequest cancelDebtReminderRequest);
 
-        debtReminder.setStatus(DebtReminder.Status.PAID);
-        debtReminder.setPaidAt(LocalDateTime.now());
-        debtReminderRepository.save(debtReminder);
-    }
-
-    public DebtReminderDto createDebtReminder(CreateDebtReminderRequest createDebtReminderRequest, UUID userId) {
-        User creditor = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Account debtorAccount = accountRepository.findById(createDebtReminderRequest.getDebtorAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("Debtor account not found"));
-
-        // Create Debt reminder
-        DebtReminder debtReminder = DebtReminder.builder()
-                .creditor(creditor)
-                .debtorAccount(debtorAccount)
-                .amount(createDebtReminderRequest.getAmount())
-                .content(createDebtReminderRequest.getContent())
-                .status(DebtReminder.Status.PENDING)
-                .build();
-
-        debtReminderRepository.save(debtReminder);
-
-        return modelMapper.map(debtReminder, DebtReminderDto.class);
-    }
-
-    public DebtReminderDto getDebtReminderById(UUID debtReminderId) {
-        DebtReminder debtReminder = debtReminderRepository.findById(debtReminderId)
-                .orElseThrow(() -> new IllegalArgumentException("Debt reminder not found"));
-
-        return modelMapper.map(debtReminder, DebtReminderDto.class);
-    }
+    void cancelReceivedDebtReminder(UUID debtReminderId, CancelDebtReminderRequest cancelDebtReminderRequest, UUID userId);
 }

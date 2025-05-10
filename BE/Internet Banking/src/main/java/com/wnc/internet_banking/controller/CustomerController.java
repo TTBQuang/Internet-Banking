@@ -7,20 +7,19 @@ import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.User;
 import com.wnc.internet_banking.service.AccountService;
 import com.wnc.internet_banking.service.UserService;
+import com.wnc.internet_banking.service.impl.AccountServiceImpl;
+import com.wnc.internet_banking.service.impl.UserServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
 
     private final UserService userService;
     private final AccountService accountService;
-
-    public CustomerController(UserService userService, AccountService accountService) {
-        this.userService = userService;
-        this.accountService = accountService;
-    }
 
     @PostMapping("/register")
     public ResponseEntity<BaseResponse<User>> registerCustomer(@RequestBody CustomerRegistrationDto dto) {
