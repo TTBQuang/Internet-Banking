@@ -6,47 +6,109 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
-import LoginPage from "./pages/LoginPage";
-import CustomerDashBoard from "./pages/customer/CustomerDashBoard";
-import EmployeeDashBoard from "./pages/employee/EmployeeDashBoard";
-import AdminDashBoard from "./pages/admin/AdminDashBoard";
+import LoginPage from "./pages/login";
+import CustomerDashBoard from "./pages/customer/dashboard";
+import EmployeeDashBoard from "./pages/employee/dashboard";
+import AdminDashBoard from "./pages/admin/dashboard";
+import Transfer from "./pages/customer/transfer";
+import History from "./pages/customer/history";
+import DebtReminders from "./pages/customer/debt-reminders";
+import Recipients from "./pages/customer/recipients";
+import Profile from "./pages/customer/profile";
 
 function App() {
   const user = useSelector((state) => state.user);
+
+  // Protected Route component
+  const ProtectedRoute = ({ children, allowedRoles }) => {
+    if (!user.role) {
+      return <Navigate to="/" />;
+    }
+
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+      return <Navigate to="/" />;
+    }
+
+    return children;
+  };
 
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
 
+        {/* Customer Routes */}
         <Route
           path="/customer/dashboard"
           element={
-            user.role === "CUSTOMER" ? (
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
               <CustomerDashBoard />
-            ) : (
-              <Navigate to="/" />
-            )
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/dashboard/transfer"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <Transfer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/dashboard/history"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <History />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/dashboard/debt-reminders"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <DebtReminders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/dashboard/recipients"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <Recipients />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/dashboard/profile"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <Profile />
+            </ProtectedRoute>
           }
         />
 
+        {/* Employee Routes */}
         <Route
           path="/employee/dashboard"
           element={
-            user.role === "EMPLOYEE" ? (
+            <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
               <EmployeeDashBoard />
-            ) : (
-              <Navigate to="/" />
-            )
+            </ProtectedRoute>
           }
         />
 
+        {/* Admin Routes */}
         <Route
           path="/admin/dashboard"
           element={
-            user.role === "ADMIN" ? <AdminDashBoard /> : <Navigate to="/" />
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminDashBoard />
+            </ProtectedRoute>
           }
         />
+
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
