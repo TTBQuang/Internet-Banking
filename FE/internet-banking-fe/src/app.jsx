@@ -15,6 +15,9 @@ import History from "./pages/customer/history";
 import DebtReminders from "./pages/customer/debt-reminders";
 import Recipients from "./pages/customer/recipients";
 import Profile from "./pages/customer/profile";
+import ForgotPasswordPage from "./pages/forgot-password";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const user = useSelector((state) => state.user);
@@ -36,6 +39,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Customer Routes */}
         <Route
@@ -110,6 +114,7 @@ function App() {
         {/* Catch all route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <ToastContainer position="top-right" />
     </Router>
   );
 }
