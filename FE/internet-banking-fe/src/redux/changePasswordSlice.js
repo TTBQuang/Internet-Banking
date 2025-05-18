@@ -1,11 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { changePassword as changePasswordApi } from "../services/authService";
+import apiClient from "../services/apiClient";
 
 export const changePassword = createAsyncThunk(
   "changePassword/changePassword",
   async ({ oldPassword, newPassword }, { rejectWithValue }) => {
     try {
-      const res = await changePasswordApi({ oldPassword, newPassword });
+      const res = await apiClient.post("/auth/change-password", {
+        oldPassword,
+        newPassword,
+      });
       return res.message || "Password changed successfully";
     } catch (err) {
       return rejectWithValue(err.message || "Failed to change password");
