@@ -14,12 +14,12 @@ export const login = async (credentials) => {
   );
 
   if (
-    response.token &&
-    response.token.accessToken &&
-    response.token.refreshToken
+    response.data.token &&
+    response.data.token.accessToken &&
+    response.data.token.refreshToken
   ) {
-    localStorage.setItem("accessToken", response.token.accessToken);
-    localStorage.setItem("refreshToken", response.token.refreshToken);
+    localStorage.setItem("accessToken", response.data.token.accessToken);
+    localStorage.setItem("refreshToken", response.data.token.refreshToken);
   }
 
   return response;
@@ -38,3 +38,11 @@ export const logout = async () => {
     localStorage.removeItem("refreshToken");
   }
 };
+
+export async function changePassword({ oldPassword, newPassword }) {
+  const res = await apiClient.post("/auth/change-password", {
+    oldPassword,
+    newPassword,
+  });
+  return res;
+}

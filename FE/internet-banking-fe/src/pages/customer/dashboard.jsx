@@ -16,12 +16,15 @@ import {
   AlertCircle,
 } from "lucide-react";
 import DashboardLayout from "../../components/dashboard-layout";
+import { useSelector } from "react-redux";
 
 export default function CustomerDashboardPage() {
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN").format(amount);
   };
+
+  const fullName = useSelector((state) => state.user.fullName);
 
   // Mock data
   const accountBalance = 85000000;
@@ -82,7 +85,9 @@ export default function CustomerDashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Nguyen Van A</p>
+          <p className="text-muted-foreground">
+            Welcome back, {fullName || "User"}
+          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

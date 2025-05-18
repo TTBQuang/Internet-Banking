@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getAccount } from "../services/accountService";
+import apiClient from "@/services/apiClient";
 
 export const fetchAccount = createAsyncThunk(
   "account/fetchAccount",
   async (_, { rejectWithValue }) => {
     try {
-      const data = await getAccount();
+      const data = await apiClient.get("/account");
       return data.data;
     } catch (error) {
       return rejectWithValue(error.message);

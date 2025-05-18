@@ -99,10 +99,10 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white p-4">
-      <Link to="/" className="flex items-center space-x-2 mb-8">
+      <div className="flex items-center space-x-2 mb-8">
         <Shield className="h-8 w-8 text-blue-600" />
         <span className="font-bold text-xl text-blue-600">SecureBank</span>
-      </Link>
+      </div>
 
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
@@ -162,7 +162,12 @@ const LoginPage = () => {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              variant="black"
+              disabled={loading}
+            >
               {loading ? (
                 <span className="flex items-center justify-center">
                   <svg
