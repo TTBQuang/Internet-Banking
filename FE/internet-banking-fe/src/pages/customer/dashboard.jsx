@@ -15,7 +15,7 @@ import {
   Users,
   AlertCircle,
 } from "lucide-react";
-import DashboardLayout from "../../components/dashboard-layout";
+import DashboardLayout from "../../components/common/dashboard-layout";
 import { useSelector } from "react-redux";
 
 export default function CustomerDashboardPage() {
