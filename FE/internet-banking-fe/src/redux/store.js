@@ -4,6 +4,7 @@ import userReducer from "./userSlice";
 import accountReducer from "./accountSlice";
 import forgotPasswordReducer from "./forgotPasswordSlice";
 import changePasswordReducer from "./changePasswordSlice";
+import recipientsReducer from "./recipientsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,5 +12,6 @@ export const store = configureStore({
     account: accountReducer,
     forgotPassword: forgotPasswordReducer,
     changePassword: changePasswordReducer,
+    recipients: recipientsReducer,
   },
 });

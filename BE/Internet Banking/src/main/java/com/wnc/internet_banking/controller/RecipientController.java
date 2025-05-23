@@ -41,12 +41,14 @@ public class RecipientController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<Page<RecipientDto>>> getRecipients(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String nickname
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
-        Page<RecipientDto> recipients = recipientService.getRecipientsByUser(userId, page, size);
+        Page<RecipientDto> recipients = recipientService.getRecipientsByUserAndNickname(userId, nickname, page, size);
         return ResponseEntity.ok(BaseResponse.data(recipients));
     }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name) and hasRole('CUSTOMER')")

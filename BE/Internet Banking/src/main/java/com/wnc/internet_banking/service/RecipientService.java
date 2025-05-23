@@ -14,7 +14,7 @@ public interface RecipientService {
 
     boolean isRecipientOwner(UUID recipientId, String userId);
 
-    Page<RecipientDto> getRecipientsByUser(UUID userId, int page, int size);
+    Page<RecipientDto> getRecipientsByUserAndNickname(UUID userId, String nickname, int page, int size);
 
     RecipientDto updateRecipientNickname(UUID recipientId, RecipientUpdateRequest request);
 }

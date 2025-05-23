@@ -16,9 +16,9 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useMobile } from "../hooks/use-mobile";
+import { useMobile } from "../../hooks/use-mobile";
 import { useDispatch } from "react-redux";
-import { logout } from "../redux/userSlice";
+import { logout } from "../../redux/userSlice";
 
 export default function DashboardSidebar() {
   const dispatch = useDispatch();

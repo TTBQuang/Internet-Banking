@@ -87,9 +87,16 @@ public class RecipientServiceImpl implements RecipientService {
     }
 
     @Override
-    public Page<RecipientDto> getRecipientsByUser(UUID userId, int page, int size) {
+    public Page<RecipientDto> getRecipientsByUserAndNickname(UUID userId, String nickname, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Recipient> recipients = recipientRepository.findByOwner_UserId(userId, pageable);
+
+        Page<Recipient> recipients;
+        if (nickname == null || nickname.isEmpty()) {
+            recipients = recipientRepository.findByOwner_UserId(userId, pageable);
+        } else {
+            recipients = recipientRepository.findByOwner_UserIdAndNicknameContainingIgnoreCase(userId, nickname, pageable);
+        }
+
         return recipients.map(recipient -> modelMapper.map(recipient, RecipientDto.class));
     }
 

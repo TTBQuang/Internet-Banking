@@ -21,7 +21,7 @@ import {
 import { Link } from "react-router-dom";
 import { User } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/userSlice";
+import { logout } from "../../redux/userSlice";
 import {
   Dialog,
   DialogContent,
