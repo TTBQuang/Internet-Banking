@@ -14,7 +14,6 @@ import Transfer from "./pages/customer/transfer";
 import History from "./pages/customer/history";
 import DebtReminders from "./pages/customer/debt-reminders";
 import Recipients from "./pages/customer/recipients";
-import Profile from "./pages/customer/profile";
 import ForgotPasswordPage from "./pages/forgot-password";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -79,14 +78,6 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["CUSTOMER"]}>
               <Recipients />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/customer/dashboard/profile"
-          element={
-            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-              <Profile />
             </ProtectedRoute>
           }
         />

@@ -169,11 +169,6 @@ export default function DashboardHeader() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link to="/customer/dashboard/profile" className="w-full">
-                  Profile
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
                 Change password
               </DropdownMenuItem>

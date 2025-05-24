@@ -63,11 +63,6 @@ export default function DashboardSidebar() {
       href: "/customer/dashboard/recipients",
       icon: <Users className="h-5 w-5" />,
     },
-    {
-      title: "Profile",
-      href: "/customer/dashboard/profile",
-      icon: <User className="h-5 w-5" />,
-    },
   ];
 
   const sidebarClasses = isMobile
