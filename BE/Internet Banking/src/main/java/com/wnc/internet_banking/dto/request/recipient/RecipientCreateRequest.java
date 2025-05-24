@@ -12,7 +12,6 @@ public class RecipientCreateRequest {
     @NotBlank(message = "Recipient account number is required")
     private String accountNumber;
 
-    @NotBlank(message = "Recipient nickname is required")
     private String nickname;
 
     private UUID bankId;

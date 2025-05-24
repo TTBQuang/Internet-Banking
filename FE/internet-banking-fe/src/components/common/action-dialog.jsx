@@ -8,7 +8,7 @@ import {
 } from "../ui/dialog";
 import { Button } from "../ui/button";
 
-export default function ConfirmationDialog({
+export default function ActionDialog({
   isOpen,
   onClose,
   title = "Confirm Action",

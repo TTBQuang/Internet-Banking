@@ -3,7 +3,7 @@ import { Search, Edit, Trash2, UserPlus } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import DashboardLayout from "../../components/common/dashboard-layout";
 import Pagination from "../../components/common/pagination";
-import ConfirmationDialog from "../../components/common/confirmation-dialog";
+import ActionDialog from "../../components/common/action-dialog";
 import {
   fetchRecipients,
   addRecipient,
@@ -350,7 +350,7 @@ function AddRecipientDialog({ isOpen, onClose, loading, error, onSubmit }) {
   };
 
   return (
-    <ConfirmationDialog
+    <ActionDialog
       isOpen={isOpen}
       onClose={onClose}
       title="Add New Recipient"
@@ -414,7 +414,7 @@ function EditRecipientDialog({
   error,
 }) {
   return (
-    <ConfirmationDialog
+    <ActionDialog
       isOpen={isOpen}
       onClose={onClose}
       title="Edit Recipient"
@@ -455,7 +455,7 @@ function DeleteRecipientDialog({
   onConfirm,
 }) {
   return (
-    <ConfirmationDialog
+    <ActionDialog
       isOpen={isOpen}
       onClose={onClose}
       title="Delete Recipient"
