@@ -100,6 +100,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/auth/login")
                 || path.equals("/auth/refresh")
                 || path.equals("/auth/password-reset/initiate")
-                || path.equals("/auth/password-reset/verify");
+                || path.equals("/auth/password-reset/verify")
+                || path.startsWith("/api/linked-banks");
     }
 }

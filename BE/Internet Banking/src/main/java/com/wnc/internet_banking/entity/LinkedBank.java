@@ -35,8 +35,12 @@ public class LinkedBank {
     private String bankName;
 
     @NotNull
-    @Column(name = "public_key", nullable = false)
+    @Column(name = "public_key", nullable = false, columnDefinition = "TEXT")
     private String publicKey;
+
+    @NotNull
+    @Column(name = "secret_key_hash", nullable = false)
+    private String secretKeyHash;
 
     @NotNull
     @Column(name = "encryption_method", nullable = false)
