@@ -1,13 +1,31 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { login, logout as logoutService } from "../services/authService";
+import apiClient from "../services/apiClient";
 
 // Async thunk for login
 export const loginUser = createAsyncThunk(
   "user/login",
   async (credentials, { rejectWithValue }) => {
     try {
-      const data = await login(credentials);
-      return data.data;
+      const response = await apiClient.post(
+        "/auth/login",
+        {
+          username: credentials.username,
+          password: credentials.password,
+          recaptchaToken: credentials.recaptchaToken,
+        },
+        {
+          withToken: false,
+        }
+      );
+      if (
+        response.data.token &&
+        response.data.token.accessToken &&
+        response.data.token.refreshToken
+      ) {
+        localStorage.setItem("accessToken", response.data.token.accessToken);
+        localStorage.setItem("refreshToken", response.data.token.refreshToken);
+      }
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -15,17 +33,20 @@ export const loginUser = createAsyncThunk(
 );
 
 // Async thunk for logout
-export const logout = createAsyncThunk(
-  "user/logout",
-  async (_, { rejectWithValue }) => {
-    try {
-      await logoutService();
-      return true;
-    } catch (error) {
-      return rejectWithValue(error.message);
+export const logout = createAsyncThunk("user/logout", async () => {
+  try {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (refreshToken) {
+      await apiClient.post("/auth/logout", { refreshToken });
     }
+  } catch (error) {
+    console.error("Logout error:", error);
+  } finally {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   }
-);
+  return true;
+});
 
 const userSlice = createSlice({
   name: "user",
@@ -33,6 +54,7 @@ const userSlice = createSlice({
     username: null,
     fullName: null,
     email: null,
+    phone: null,
     role: null,
     loading: false,
     error: null,
@@ -50,6 +72,7 @@ const userSlice = createSlice({
         state.username = action.payload.user.username;
         state.fullName = action.payload.user.fullName;
         state.email = action.payload.user.email;
+        state.phone = action.payload.user.phone;
         state.role = action.payload.user.role;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -66,6 +89,7 @@ const userSlice = createSlice({
           username: null,
           fullName: null,
           email: null,
+          phone: null,
           role: null,
           loading: false,
           error: null,
@@ -77,6 +101,7 @@ const userSlice = createSlice({
         state.username = null;
         state.fullName = null;
         state.email = null;
+        state.phone = null;
         state.role = null;
       });
   },

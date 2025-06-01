@@ -55,7 +55,10 @@ public class RecipientServiceImpl implements RecipientService {
             Optional<User> recipientUser = accountRepository.findByAccountNumber(request.getAccountNumber())
                     .map(Account::getUser);
             if (recipientUser.isPresent()) {
-                recipient.setNickname(request.getNickname() != null ? request.getNickname() : recipientUser.get().getFullName());
+                recipient.setNickname(request.getNickname() != null && !request.getNickname().isEmpty() ?
+                        request.getNickname() :
+                        recipientUser.get().getFullName()
+                );
             } else {
                 throw new IllegalArgumentException("Recipient user not found");
             }
@@ -63,7 +66,10 @@ public class RecipientServiceImpl implements RecipientService {
             LinkedBank bank = linkedBankRepository.findById(request.getBankId())
                     .orElseThrow(() -> new IllegalArgumentException("Bank not found"));
             recipient.setBank(bank);
-            recipient.setNickname(request.getNickname() != null ? request.getNickname() : request.getFullName());
+            recipient.setNickname(request.getNickname() != null && !request.getNickname().isEmpty() ?
+                    request.getNickname() :
+                    request.getFullName()
+            );
         }
 
         Recipient savedRecipient = recipientRepository.save(recipient);
@@ -87,9 +93,16 @@ public class RecipientServiceImpl implements RecipientService {
     }
 
     @Override
-    public Page<RecipientDto> getRecipientsByUser(UUID userId, int page, int size) {
+    public Page<RecipientDto> getRecipientsByUserAndNickname(UUID userId, String nickname, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Recipient> recipients = recipientRepository.findByOwner_UserId(userId, pageable);
+
+        Page<Recipient> recipients;
+        if (nickname == null || nickname.isEmpty()) {
+            recipients = recipientRepository.findByOwner_UserId(userId, pageable);
+        } else {
+            recipients = recipientRepository.findByOwner_UserIdAndNicknameContainingIgnoreCase(userId, nickname, pageable);
+        }
+
         return recipients.map(recipient -> modelMapper.map(recipient, RecipientDto.class));
     }
 
