@@ -18,9 +18,17 @@ public interface DebtReminderService {
 
     DebtReminderDto getDebtReminderById(UUID debtReminderId);
 
-    Page<DebtReminderDto> getDebtRemindersByUser(UUID userId, int page, int size);
+    Page<DebtReminderDto> getAllDebtRemindersByUser(UUID userId, int page, int size);
+
+    Page<DebtReminderDto> searchAllDebtRemindersByUser(UUID userId, String query, int page, int size);
+
+    Page<DebtReminderDto> getSentDebtRemindersByUser(UUID userId, int page, int size);
+
+    Page<DebtReminderDto> searchSentDebtRemindersByUser(UUID userId, String query, int page, int size);
 
     Page<DebtReminderDto> getReceivedDebtRemindersByUser(UUID userId, int page, int size);
+
+    Page<DebtReminderDto> searchReceivedDebtRemindersByUser(UUID userId, String query, int page, int size);
 
     void cancelDebtReminder(UUID debtReminderId, CancelDebtReminderRequest cancelDebtReminderRequest);
 

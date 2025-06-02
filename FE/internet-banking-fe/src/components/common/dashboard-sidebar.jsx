@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Shield,
   LayoutDashboard,
@@ -14,11 +14,11 @@ import {
   Menu,
   AlertCircle,
   User,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useMobile } from "../../hooks/use-mobile";
-import { useDispatch } from "react-redux";
-import { logout } from "../../redux/userSlice";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useMobile } from '../../hooks/use-mobile';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../redux/userSlice';
 
 export default function DashboardSidebar() {
   const dispatch = useDispatch();
@@ -39,38 +39,38 @@ export default function DashboardSidebar() {
 
   const navItems = [
     {
-      title: "Dashboard",
-      href: "/customer/dashboard",
+      title: 'Dashboard',
+      href: '/customer/dashboard',
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
-      title: "Transfer",
-      href: "/customer/dashboard/transfer",
+      title: 'Transfer',
+      href: '/customer/dashboard/transfer',
       icon: <ArrowRightLeft className="h-5 w-5" />,
     },
     {
-      title: "History",
-      href: "/customer/dashboard/history",
+      title: 'History',
+      href: '/customer/dashboard/history',
       icon: <Clock className="h-5 w-5" />,
     },
     {
-      title: "Debt Reminders",
-      href: "/customer/dashboard/debt-reminders",
+      title: 'Debt Reminders',
+      href: '/customer/dashboard/debt-reminders',
       icon: <AlertCircle className="h-5 w-5" />,
     },
     {
-      title: "Recipients",
-      href: "/customer/dashboard/recipients",
+      title: 'Recipients',
+      href: '/customer/dashboard/recipients',
       icon: <Users className="h-5 w-5" />,
     },
   ];
 
   const sidebarClasses = isMobile
     ? `fixed inset-y-0 left-0 z-50 w-64 bg-white border-r transform transition-transform duration-300 ease-in-out ${
-        mobileOpen ? "translate-x-0" : "-translate-x-full"
+        mobileOpen ? 'translate-x-0' : '-translate-x-full'
       }`
     : `bg-white border-r h-screen transition-all duration-300 ${
-        collapsed ? "w-[70px]" : "w-64"
+        collapsed ? 'w-[70px]' : 'w-64'
       }`;
 
   return (
@@ -120,8 +120,8 @@ export default function DashboardSidebar() {
                 to={item.href}
                 className={`flex items-center rounded-md px-3 py-2 text-sm transition-colors ${
                   pathname === item.href
-                    ? "bg-blue-50 text-blue-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? 'bg-blue-50 text-blue-600 font-medium'
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <span className="flex items-center justify-center w-5">
