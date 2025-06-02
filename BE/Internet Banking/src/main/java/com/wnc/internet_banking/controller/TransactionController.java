@@ -1,0 +1,91 @@
+package com.wnc.internet_banking.controller;
+
+import com.wnc.internet_banking.dto.request.transaction.ConfirmDebtPaymentRequest;
+import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionRequest;
+import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
+import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
+import com.wnc.internet_banking.dto.response.BaseResponse;
+import com.wnc.internet_banking.entity.Transaction;
+import com.wnc.internet_banking.service.TransactionService;
+import com.wnc.internet_banking.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/transactions")
+public class TransactionController {
+    private final TransactionService transactionService;
+
+    @GetMapping("/histories/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<List<Transaction>>> getTransactionHistoryForCustomer(
+            @RequestParam String accountNumber) {
+        List<Transaction> transactions = transactionService.getTransactionHistory(accountNumber);
+        return ResponseEntity.ok(BaseResponse.data(transactions));
+    }
+
+    @GetMapping("/histories")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<BaseResponse<List<Transaction>>> getTransactionHistoryForEmployee(
+            @RequestParam String accountNumber) {
+        List<Transaction> transactions = transactionService.getTransactionHistory(accountNumber);
+        return ResponseEntity.ok(BaseResponse.data(transactions));
+    }
+
+
+    @PostMapping("/internal-transfers")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<UUID>> initiateInternalTransfer (
+            @RequestBody InternalTransferRequest internalTransferRequest
+    ) {
+       UUID userId = SecurityUtil.getCurrentUserId();
+
+       UUID transactionId = transactionService.initiateInternalTransfer(internalTransferRequest, userId);
+
+       return ResponseEntity.ok(BaseResponse.data(transactionId));
+    }
+
+    @PostMapping("/internal-transfers/{transactionId}/confirm")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<?>> confirmInternalTransfer (
+            @PathVariable UUID transactionId,
+            @RequestBody ConfirmTransactionRequest confirmTransactionRequest
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        transactionService.confirmInternalTransfer(transactionId, confirmTransactionRequest, userId);
+
+        return ResponseEntity.ok(BaseResponse.message("Transaction confirmed successfully"));
+    }
+
+    @PostMapping("/debt-payments")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<UUID>> initiateDebtPayment (
+            @RequestBody DebtPaymentRequest debtPaymentRequest
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        UUID transactionId = transactionService.initiateDebtPayment(debtPaymentRequest, userId);
+
+        return ResponseEntity.ok(BaseResponse.data(transactionId));
+    }
+
+    @PostMapping("/debt-payments/{transactionId}/confirm")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<?>> confirmDebtPayment (
+            @PathVariable UUID transactionId,
+            @RequestBody ConfirmDebtPaymentRequest confirmDebtPaymentRequest
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        transactionService.confirmDebtPayment(transactionId, confirmDebtPaymentRequest, userId);
+
+        return ResponseEntity.ok(BaseResponse.message("Transaction confirmed successfully"));
+    }
+}
