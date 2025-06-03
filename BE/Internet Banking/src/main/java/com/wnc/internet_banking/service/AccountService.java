@@ -1,6 +1,6 @@
 package com.wnc.internet_banking.service;
 
-import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.User;
 

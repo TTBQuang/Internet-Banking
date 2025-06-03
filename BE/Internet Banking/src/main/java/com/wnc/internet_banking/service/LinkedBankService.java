@@ -1,8 +1,7 @@
 package com.wnc.internet_banking.service;
 
-import com.wnc.internet_banking.dto.request.account.AccountInfoRequestDto;
 import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferRequestDto;
-import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.account.AccountDto;
 
 public interface LinkedBankService {
     AccountDto getAccountInfo(String accountNumber);
