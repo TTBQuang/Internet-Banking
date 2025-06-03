@@ -2,6 +2,7 @@ package com.wnc.internet_banking.service.impl;
 
 import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferRequestDto;
 import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.LinkedBank;
 import com.wnc.internet_banking.entity.Transaction;
@@ -29,11 +30,14 @@ public class LinkedBankServiceImpl implements LinkedBankService {
     private final TransactionRepository transactionRepository;
 
     @Override
-    public AccountDto getAccountInfo(String accountNumber) {
+    public AccountResponseDto getAccountInfo(String accountNumber) {
         Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(
                 () -> new EntityNotFoundException("Account not found with account number: " + accountNumber));
 
-        return modelMapper.map(account, AccountDto.class);
+        AccountResponseDto accountDto = new AccountResponseDto();
+        accountDto.setAccountNumber(account.getAccountNumber());
+        accountDto.setFullName(account.getUser().getFullName());
+        return accountDto;
     }
 
     @Override

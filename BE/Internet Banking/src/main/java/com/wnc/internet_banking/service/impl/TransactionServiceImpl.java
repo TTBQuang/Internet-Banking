@@ -42,7 +42,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     // Create transaction object and send otp
     private Transaction createTransactionAndSendOtp(
-            UUID senderAccountId,
             UUID receiverAccountId,
             Double amount,
             String content,
@@ -52,7 +51,7 @@ public class TransactionServiceImpl implements TransactionService {
         User sender = userRepository.findById(senderUserId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Account senderAccount = accountRepository.findByAccountIdAndUser(senderAccountId, sender)
+        Account senderAccount = accountRepository.findByUser(sender)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sender account"));
 
         Account receiverAccount = accountRepository.findById(receiverAccountId)
@@ -131,7 +130,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                internalTransferRequest.getSenderAccountId(),
                 internalTransferRequest.getReceiverAccountId(),
                 internalTransferRequest.getAmount(),
                 internalTransferRequest.getContent(),
@@ -163,7 +161,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                debtPaymentRequest.getDebtorAccountId(),
                 debtPaymentRequest.getCreditorAccountId(),
                 debtReminderDto.getAmount(),
                 debtPaymentRequest.getContent(),
