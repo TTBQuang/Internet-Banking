@@ -65,10 +65,20 @@ const CreateDebtReminderDialog = ({ activeTab }) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    if (id === 'amount') {
+      // Remove non-digit characters and format with commas
+      const numericValue = value.replace(/\D/g, '');
+      const formattedValue = Number(numericValue).toLocaleString('en-US');
+      setFormData((prev) => ({
+        ...prev,
+        [id]: formattedValue,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
   };
 
   const handleRecipientSelect = (recipient) => {
@@ -98,11 +108,14 @@ const CreateDebtReminderDialog = ({ activeTab }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Add your submit logic here
-    console.log('Form submitted:', formData);
+    // Remove commas before submitting
+    const submitData = {
+      ...formData,
+      amount: formData.amount.replace(/,/g, ''),
+    };
 
     try {
-      await dispatch(createDebtReminder(formData)).unwrap();
+      await dispatch(createDebtReminder(submitData)).unwrap();
       toast.success('Debt reminder created successfully');
 
       // Refetch data

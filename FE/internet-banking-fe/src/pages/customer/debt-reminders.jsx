@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import DashboardLayout from '@/components/common/dashboard-layout';
 
-import DebtRemindersList from '@/components/debt-reminders/DebtRemindersList';
+import DebtRemindersListCard from '@/components/debt-reminders/DebtRemindersListCard';
 import CreateDebtReminderDialog from '@/components/debt-reminders/CreateDebtReminderDialog';
 
 // Mock debt reminder data
@@ -93,10 +93,10 @@ export default function DebtRemindersPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="sent" className="mt-4 space-y-4">
-            <DebtRemindersList type="sent" />
+            <DebtRemindersListCard type="sent" />
           </TabsContent>
           <TabsContent value="received" className="mt-4 space-y-4">
-            <DebtRemindersList type="received" />
+            <DebtRemindersListCard type="received" />
           </TabsContent>
         </Tabs>
       </div>
