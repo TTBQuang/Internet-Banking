@@ -1,6 +1,6 @@
 package com.wnc.internet_banking.dto.response.debtreminder;
 
-import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.dto.response.user.UserDto;
 import lombok.Getter;
 import lombok.Setter;

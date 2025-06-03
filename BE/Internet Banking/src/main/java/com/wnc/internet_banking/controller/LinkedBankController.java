@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wnc.internet_banking.dto.request.account.AccountInfoRequestDto;
 import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferRequestDto;
 import com.wnc.internet_banking.dto.response.BaseResponse;
-import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.service.LinkedBankService;
 import com.wnc.internet_banking.util.RSAUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +16,6 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController

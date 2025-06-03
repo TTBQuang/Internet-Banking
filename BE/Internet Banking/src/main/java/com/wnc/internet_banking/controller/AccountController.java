@@ -1,7 +1,7 @@
 package com.wnc.internet_banking.controller;
 
 import com.wnc.internet_banking.dto.response.BaseResponse;
-import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.service.AccountService;
 import com.wnc.internet_banking.util.SecurityUtil;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.wnc.internet_banking.dto.response.auth;
+package com.wnc.internet_banking.dto.response.account;
 
 import com.wnc.internet_banking.dto.response.user.UserDto;
 import lombok.Getter;
