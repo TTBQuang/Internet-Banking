@@ -27,7 +27,7 @@ const formatCurrency = (amount) => {
   return `₫ ${Number(amount).toLocaleString('en-US')}`;
 };
 
-const DebtRemindersList = ({ type }) => {
+const DebtRemindersListCard = ({ type }) => {
   const {
     debtReminders,
     currentPage,
@@ -178,7 +178,7 @@ const DebtRemindersList = ({ type }) => {
                     Creditor
                   </th>
                   <th className="h-12 px-4 text-left font-medium text-gray-600">
-                    Debtor Account Number
+                    Debtor
                   </th>
                   <th className="h-12 px-4 text-left font-medium text-gray-600">
                     Amount
@@ -191,6 +191,9 @@ const DebtRemindersList = ({ type }) => {
                   </th>
                   <th className="h-12 px-4 text-left font-medium text-gray-600">
                     Created At
+                  </th>
+                  <th className="h-12 px-4 text-left font-medium text-gray-600">
+                    Paid At
                   </th>
                   <th className="h-12 px-4 text-left font-medium text-gray-600">
                     Actions
@@ -233,42 +236,56 @@ const DebtRemindersList = ({ type }) => {
                       className="hover:bg-gray-50"
                     >
                       <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          {/* <Avatar className="h-9 w-9">
-                            <AvatarFallback>
-                              <User className="w-4 h-4 text-gray-500" />
-                            </AvatarFallback>
-                          </Avatar> */}
-                          <div>
-                            <div className="font-medium">
-                              {debtReminder.creditor.fullName}
-                            </div>
-                          </div>
-                        </div>
+                        <p className="font-medium">
+                          {debtReminder.creditor.fullName}
+                        </p>
                       </td>
                       <td className="p-4">
-                        {debtReminder.debtorAccount.accountNumber}
+                        <p className="font-medium">
+                          {debtReminder.debtorAccount.user.fullName}
+                        </p>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 whitespace-nowrap">
                         {formatCurrency(debtReminder.amount)}
                       </td>
                       <td className="p-4">{debtReminder.content}</td>
-                      <td className="p-4">{debtReminder.status}</td>
                       <td className="p-4">
-                        {new Date(debtReminder.createdAt).toLocaleDateString()}
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            debtReminder.status === 'PENDING'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : debtReminder.status === 'PAID'
+                              ? 'bg-green-100 text-green-800'
+                              : ''
+                          }`}
+                        >
+                          {debtReminder.status}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        {new Date(debtReminder.createdAt).toLocaleDateString(
+                          'en-GB'
+                        )}
+                      </td>
+                      <td className="p-4">
+                        {debtReminder.paidAt
+                          ? new Date(debtReminder.paidAt).toLocaleDateString(
+                              'en-GB'
+                            )
+                          : 'N/A'}
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleDelete(debtReminder)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded cursor-pointer"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
                           {type === 'received' && (
                             <button
                               onClick={() => handlePay(debtReminder)}
-                              className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded"
+                              className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded cursor-pointer"
                             >
                               <CreditCard className="h-4 w-4" />
                             </button>
@@ -290,14 +307,16 @@ const DebtRemindersList = ({ type }) => {
         </div>
       </CardContent>
       {totalElements > 0 && (
-        <CardFooter className="flex items-center justify-end border-t p-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalElements}
-            itemsPerPage={pageSize}
-            onPageChange={handlePageChange}
-          />
+        <CardFooter className="border-t p-4">
+          <div className="w-full">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalElements}
+              itemsPerPage={pageSize}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </CardFooter>
       )}
       <DeleteDebtReminderDialog
@@ -317,4 +336,4 @@ const DebtRemindersList = ({ type }) => {
   );
 };
 
-export default DebtRemindersList;
+export default DebtRemindersListCard;
