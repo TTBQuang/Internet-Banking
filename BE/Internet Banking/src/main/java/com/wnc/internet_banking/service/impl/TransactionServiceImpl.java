@@ -5,11 +5,9 @@ import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionReques
 import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
 import com.wnc.internet_banking.dto.response.debtreminder.DebtReminderDto;
-import com.wnc.internet_banking.entity.Account;
-import com.wnc.internet_banking.entity.Otp;
-import com.wnc.internet_banking.entity.Transaction;
-import com.wnc.internet_banking.entity.User;
+import com.wnc.internet_banking.entity.*;
 import com.wnc.internet_banking.repository.AccountRepository;
+import com.wnc.internet_banking.repository.RecipientRepository;
 import com.wnc.internet_banking.repository.TransactionRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import com.wnc.internet_banking.service.TransactionService;
@@ -39,6 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final EmailServiceImpl emailService;
 
     private final DebtReminderServiceImpl debtReminderService;
+    private final RecipientRepository recipientRepository;
 
     // Create transaction object and send otp
     private Transaction createTransactionAndSendOtp(
@@ -127,10 +126,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public UUID initiateInternalTransfer(InternalTransferRequest internalTransferRequest, UUID userId) {
+        Recipient recipient = recipientRepository.findById(internalTransferRequest.getRecipientId())
+                .orElseThrow(() -> new IllegalArgumentException("Recipient not found"));
 
+        Account account = accountRepository.findByAccountNumber(recipient.getAccountNumber())
+                .orElseThrow(() -> new IllegalArgumentException("Recipient account not found"));
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                internalTransferRequest.getReceiverAccountId(),
+                account.getAccountId(),
                 internalTransferRequest.getAmount(),
                 internalTransferRequest.getContent(),
                 Transaction.Type.MONEY_TRANSFER,

@@ -14,6 +14,14 @@ export const fetchRecipients = createAsyncThunk(
   }
 );
 
+export const fetchAllRecipients = createAsyncThunk(
+  'recipients/fetchAllRecipients',
+  async () => {
+    const response = await apiClient.get('/recipients/all');
+    return response.data;
+  }
+);
+
 export const addRecipient = createAsyncThunk(
   "recipients/addRecipient",
   async (recipientData) => {
@@ -75,6 +83,19 @@ const recipientsSlice = createSlice({
         state.pageSize = action.payload.page.size;
       })
       .addCase(fetchRecipients.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      // Fetch all recipients
+      .addCase(fetchAllRecipients.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllRecipients.fulfilled, (state, action) => {
+        state.loading = false;
+        state.recipients = action.payload;
+      })
+      .addCase(fetchAllRecipients.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
