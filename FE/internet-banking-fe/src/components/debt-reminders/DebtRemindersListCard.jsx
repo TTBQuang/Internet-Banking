@@ -175,10 +175,7 @@ const DebtRemindersListCard = ({ type }) => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="h-12 px-4 text-left font-medium text-gray-600">
-                    Creditor
-                  </th>
-                  <th className="h-12 px-4 text-left font-medium text-gray-600">
-                    Debtor
+                    {type === 'sent' ? 'Sent to' : 'Received from'}
                   </th>
                   <th className="h-12 px-4 text-left font-medium text-gray-600">
                     Amount
@@ -237,12 +234,9 @@ const DebtRemindersListCard = ({ type }) => {
                     >
                       <td className="p-4">
                         <p className="font-medium">
-                          {debtReminder.creditor.fullName}
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <p className="font-medium">
-                          {debtReminder.debtorAccount.user.fullName}
+                          {type === 'sent'
+                            ? debtReminder.debtorAccount.user.fullName
+                            : debtReminder.creditor.fullName}
                         </p>
                       </td>
                       <td className="p-4 whitespace-nowrap">
