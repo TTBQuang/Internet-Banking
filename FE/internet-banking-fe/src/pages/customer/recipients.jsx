@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { Search, Edit, Trash2, UserPlus } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import DashboardLayout from "../../components/common/dashboard-layout";
-import Pagination from "../../components/common/pagination";
-import ActionDialog from "../../components/common/action-dialog";
+import { useState, useEffect } from 'react';
+import { Search, Edit, Trash2, UserPlus } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import DashboardLayout from '../../components/common/dashboard-layout';
+import Pagination from '../../components/common/pagination';
+import ActionDialog from '../../components/common/action-dialog';
 import {
   fetchRecipients,
   addRecipient,
@@ -11,9 +11,9 @@ import {
   clearError,
   setPage,
   updateRecipient,
-} from "../../redux/recipientsSlice";
-import { Avatar, AvatarFallback } from "../../components/ui/avatar";
-import { User } from "lucide-react";
+} from '../../redux/recipientsSlice';
+import { Avatar, AvatarFallback } from '../../components/ui/avatar';
+import { User } from 'lucide-react';
 
 // --- Main Page Component ---
 export default function RecipientsPage() {
@@ -27,15 +27,15 @@ export default function RecipientsPage() {
     loading,
     error: globalError,
   } = useSelector((state) => state.recipients);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editRecipient, setEditRecipient] = useState(null);
-  const [editNickname, setEditNickname] = useState("");
-  const [addError, setAddError] = useState("");
-  const [editError, setEditError] = useState("");
+  const [editNickname, setEditNickname] = useState('');
+  const [addError, setAddError] = useState('');
+  const [editError, setEditError] = useState('');
 
   // Fetch recipients on component mount, page, pageSize, or searchTerm change
   useEffect(() => {
@@ -78,20 +78,20 @@ export default function RecipientsPage() {
       setIsDeleteOpen(false);
       setSelectedRecipient(null);
     } catch (err) {
-      console.error("Failed to delete recipient:", err);
+      console.error('Failed to delete recipient:', err);
     }
   };
 
   // Handle edit recipient
   const handleEdit = (recipient) => {
     setEditRecipient(recipient);
-    setEditNickname(recipient.nickname || "");
-    setEditError("");
+    setEditNickname(recipient.nickname || '');
+    setEditError('');
     setIsEditOpen(true);
   };
 
   const confirmEdit = async () => {
-    setEditError("");
+    setEditError('');
     try {
       await dispatch(
         updateRecipient({
@@ -101,27 +101,27 @@ export default function RecipientsPage() {
       ).unwrap();
       setIsEditOpen(false);
       setEditRecipient(null);
-      setEditNickname("");
+      setEditNickname('');
     } catch (err) {
-      setEditError(err?.message || "An error occurred");
+      setEditError(err?.message || 'An error occurred');
     }
   };
 
   // Add recipient submit handler
   const handleAddRecipient = async (formData, resetForm) => {
-    setAddError("");
+    setAddError('');
     try {
       await dispatch(addRecipient(formData)).unwrap();
       setIsAddOpen(false);
       resetForm();
     } catch (err) {
-      setAddError(err?.message || "An error occurred");
+      setAddError(err?.message || 'An error occurred');
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Recipients</h1>
@@ -241,7 +241,7 @@ export default function RecipientsPage() {
                           </td>
                           <td className="p-4">{recipient.accountNumber}</td>
                           <td className="p-4">
-                            {recipient.bank?.bankName || "SecureBank"}
+                            {recipient.bank?.bankName || 'SecureBank'}
                           </td>
                           <td className="p-4">
                             {new Date(recipient.createdAt).toLocaleDateString()}
@@ -297,7 +297,7 @@ export default function RecipientsPage() {
           isOpen={isAddOpen}
           onClose={() => {
             setIsAddOpen(false);
-            setAddError("");
+            setAddError('');
             dispatch(clearError());
           }}
           loading={loading}
@@ -310,8 +310,8 @@ export default function RecipientsPage() {
           onClose={() => {
             setIsEditOpen(false);
             setEditRecipient(null);
-            setEditNickname("");
-            setEditError("");
+            setEditNickname('');
+            setEditError('');
             dispatch(clearError());
           }}
           loading={loading}
@@ -339,13 +339,13 @@ export default function RecipientsPage() {
 // --- Dialog Components ---
 function AddRecipientDialog({ isOpen, onClose, loading, error, onSubmit }) {
   const [formData, setFormData] = useState({
-    accountNumber: "",
-    nickname: "",
+    accountNumber: '',
+    nickname: '',
   });
 
   const handleSubmit = async () => {
     await onSubmit(formData, () =>
-      setFormData({ accountNumber: "", nickname: "" })
+      setFormData({ accountNumber: '', nickname: '' })
     );
   };
 
