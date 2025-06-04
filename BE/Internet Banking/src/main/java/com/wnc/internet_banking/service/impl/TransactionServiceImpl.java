@@ -126,10 +126,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public UUID initiateInternalTransfer(InternalTransferRequest internalTransferRequest, UUID userId) {
-        Recipient recipient = recipientRepository.findById(internalTransferRequest.getRecipientId())
-                .orElseThrow(() -> new IllegalArgumentException("Recipient not found"));
-
-        Account account = accountRepository.findByAccountNumber(recipient.getAccountNumber())
+        Account account = accountRepository.findByAccountNumber(internalTransferRequest.getReceiverAccountNumber())
                 .orElseThrow(() -> new IllegalArgumentException("Recipient account not found"));
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(

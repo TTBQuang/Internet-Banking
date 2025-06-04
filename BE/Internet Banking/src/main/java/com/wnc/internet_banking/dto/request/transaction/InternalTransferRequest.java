@@ -10,7 +10,7 @@ import java.util.UUID;
 @Setter
 @Builder
 public class InternalTransferRequest {
-    private UUID recipientId;
+    private String receiverAccountNumber;
 
     private Double amount;
 

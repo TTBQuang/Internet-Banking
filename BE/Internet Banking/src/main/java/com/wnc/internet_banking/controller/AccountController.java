@@ -1,15 +1,15 @@
 package com.wnc.internet_banking.controller;
 
+import com.wnc.internet_banking.dto.request.account.AccountInfoRequestDto;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.service.AccountService;
 import com.wnc.internet_banking.util.SecurityUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -25,5 +25,13 @@ public class AccountController {
         UUID userId = SecurityUtil.getCurrentUserId();
         AccountDto accountDTO = accountService.getAccountByUserId(userId);
         return ResponseEntity.ok(BaseResponse.data(accountDTO));
+    }
+
+    @GetMapping("/{accountNumber}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<?>> getAccountByAccountNumber(
+            @PathVariable String accountNumber) {
+        AccountResponseDto account = accountService.getAccountByAccountNumber(accountNumber);
+        return ResponseEntity.ok(BaseResponse.data(account));
     }
 }

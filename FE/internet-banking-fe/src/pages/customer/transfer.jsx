@@ -10,6 +10,7 @@ import { ArrowRight, Loader2, Search, User, CheckCircle2 } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchAllRecipients } from "../../redux/recipientsSlice"
 import { initiateInternalTransfer, confirmInternalTransfer } from "../../redux/transferSlice"
+import { fetchAccountByAccountNumber } from "../../redux/accountSlice"
 
 export default function TransferPage() {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ export default function TransferPage() {
 
   const [step, setStep] = useState(1)
   const [transferType, setTransferType] = useState("recipient")
-  const [recipientInfo, setRecipientInfo] = useState(null)
+  const [receiverInfo, setReceiverInfo] = useState(null)
   const [isSearching, setIsSearching] = useState(false)
   const [amount, setAmount] = useState("")
   const [description, setDescription] = useState("")
@@ -58,16 +59,16 @@ export default function TransferPage() {
     setError("");
     setIsSearching(true)
     // Simulate API call
-    setTimeout(() => {
-      // Mock recipient data
-      const foundRecipient = {
-        name: "Hoang Van E",
-        accountNumber: accountNumber,
-        bank: "Techcombank",
-      }
-      setRecipientInfo(foundRecipient)
+    dispatch(fetchAccountByAccountNumber(accountNumber))
+    .unwrap()
+    .then((recipient) => {
+      setReceiverInfo(recipient)
       setIsSearching(false)
-    }, 1000)
+    })
+    .catch((err) => {
+      setIsSearching(false);
+      setError(err);
+    });
   }
 
   // Handle OTP input
@@ -107,7 +108,7 @@ export default function TransferPage() {
   // Handle recipient selection
   const handleSelectRecipient = (recipient) => {
     setError("");
-    setRecipientInfo(recipient)
+    setReceiverInfo(recipient)
   }
 
   // Reset the form
@@ -115,7 +116,7 @@ export default function TransferPage() {
     setError("");
     setStep(1)
     setTransferType("recipient")
-    setRecipientInfo(null)
+    setReceiverInfo(null)
     setAmount("")
     setDescription("")
     setOtp(["", "", "", "", "", ""])
@@ -127,10 +128,12 @@ export default function TransferPage() {
     setError("");
 
     const payload = {
-      recipientId: recipientInfo.recipientId,
+      receiverAccountNumber: receiverInfo.accountNumber,
       amount: parseFloat(amount),
       content: description
     };
+
+    console.log(payload);
 
     dispatch(initiateInternalTransfer(payload))
       .unwrap()
@@ -166,7 +169,9 @@ export default function TransferPage() {
               <CardContent>
                 {step === 1 && (
                   <div className="space-y-6">
-                    <Tabs value={transferType} onValueChange={setTransferType}>
+                    <Tabs value={transferType} onValueChange={(value) => {
+                      setTransferType(value);
+                      setReceiverInfo(null);}}>
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="recipient">Select Recipient</TabsTrigger>
                         <TabsTrigger value="account">Enter Account Number</TabsTrigger>
@@ -179,7 +184,7 @@ export default function TransferPage() {
                               recipients.map((recipient) => (
                                 <div
                                   key={recipient.recipientId}
-                                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${recipientInfo?.recipientId === recipient.recipientId
+                                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${receiverInfo?.recipientId === recipient.recipientId
                                     ? "border-blue-500 bg-blue-50"
                                     : "hover:bg-gray-50"
                                     }`}
@@ -197,7 +202,7 @@ export default function TransferPage() {
                                         </p>
                                       </div>
                                     </div>
-                                    {recipientInfo?.recipientId === recipient.recipientId && (
+                                    {receiverInfo?.recipientId === recipient.recipientId && (
                                       <CheckCircle2 className="h-5 w-5 text-blue-600" />
                                     )}
                                   </div>
@@ -229,16 +234,16 @@ export default function TransferPage() {
                           </div>
                         </div>
 
-                        {recipientInfo && (
+                        {receiverInfo && (
                           <div className="p-4 border rounded-lg bg-blue-50">
                             <div className="flex items-center gap-3">
                               <div className="bg-blue-100 p-2 rounded-full">
                                 <User className="h-4 w-4 text-blue-600" />
                               </div>
                               <div>
-                                <p className="font-medium">{recipientInfo.name}</p>
+                                <p className="font-medium">{receiverInfo.name}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  {recipientInfo.accountNumber}
+                                  {receiverInfo.accountNumber} - {receiverInfo.fullName}
                                 </p>
                               </div>
                             </div>
@@ -276,20 +281,20 @@ export default function TransferPage() {
                   </div>
                 )}
 
-                {step === 2 && recipientInfo && (
+                {step === 2 && receiverInfo && (
                   <div className="space-y-6">
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Recipient</p>
+                        <p className="text-sm text-muted-foreground">Receiver Account</p>
                         <div className="p-4 border rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="bg-blue-100 p-2 rounded-full">
                               <User className="h-4 w-4 text-blue-600" />
                             </div>
                             <div>
-                              <p className="font-medium">{recipientInfo.nickname}</p>
+                              <p className="font-medium">{receiverInfo.nickname || receiverInfo.fullName}</p>
                               <p className="text-sm text-muted-foreground">
-                                {recipientInfo.accountNumber}
+                                {receiverInfo.accountNumber}
                               </p>
                             </div>
                           </div>
@@ -363,7 +368,7 @@ export default function TransferPage() {
                   </Button>
                 )}
                 {step === 1 ? (
-                  <Button onClick={() => setStepAndClearError(2)} disabled={!recipientInfo || !amount}>
+                  <Button onClick={() => setStepAndClearError(2)} disabled={!receiverInfo || !amount}>
                     Continue
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -396,7 +401,7 @@ export default function TransferPage() {
               </div>
               <h2 className="text-2xl font-bold mb-2">Transfer Successful!</h2>
               <p className="text-muted-foreground mb-6">
-                You have successfully transferred ₫{formatCurrency(amount)} to {recipientInfo.name}
+                You have successfully transferred ₫{formatCurrency(amount)} to {receiverInfo.name}
               </p>
               <div className="space-y-4">
                 <Button className="w-full" onClick={resetForm}>
