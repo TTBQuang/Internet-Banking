@@ -2,6 +2,7 @@ package com.wnc.internet_banking.service.impl;
 
 import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferRequestDto;
 import com.wnc.internet_banking.dto.response.account.AccountDto;
+import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.LinkedBank;
 import com.wnc.internet_banking.entity.Transaction;
@@ -14,24 +15,42 @@ import com.wnc.internet_banking.util.RSAUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
 @Service("linkedBankService")
-@AllArgsConstructor
 public class LinkedBankServiceImpl implements LinkedBankService {
     private final AccountRepository accountRepository;
     private final ModelMapper modelMapper;
     private final LinkedBankRepository linkedBankRepository;
     private final TransactionRepository transactionRepository;
 
+    @Value("${hash.secret-key}")
+    private String hashSecretKey;
+
+    public LinkedBankServiceImpl(AccountRepository accountRepository,
+                                 ModelMapper modelMapper,
+                                 LinkedBankRepository linkedBankRepository,
+                                 TransactionRepository transactionRepository,
+                                 @Value("${hash.secret-key}") String hashSecretKey) {
+        this.accountRepository = accountRepository;
+        this.modelMapper = modelMapper;
+        this.linkedBankRepository = linkedBankRepository;
+        this.transactionRepository = transactionRepository;
+        this.hashSecretKey = hashSecretKey;
+    }
+
     @Override
-    public AccountDto getAccountInfo(String accountNumber) {
+    public AccountResponseDto getAccountInfo(String accountNumber) {
         Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(
                 () -> new EntityNotFoundException("Account not found with account number: " + accountNumber));
 
-        return modelMapper.map(account, AccountDto.class);
+        AccountResponseDto accountDto = new AccountResponseDto();
+        accountDto.setAccountNumber(account.getAccountNumber());
+        accountDto.setFullName(account.getUser().getFullName());
+        return accountDto;
     }
 
     @Override
@@ -79,9 +98,9 @@ public class LinkedBankServiceImpl implements LinkedBankService {
         LinkedBank bank = linkedBankRepository.findByBankCode(bankCode)
                 .orElseThrow(() -> new EntityNotFoundException("Unknown bank with bank code: " + bankCode));
 
-        String hashInput = rawBody + timestamp + bankCode + bank.getSecretKeyHash();
+        String hashInput = rawBody + timestamp + bankCode + hashSecretKey;
 
-        String expectedHash = HmacUtils.hmacSha256(hashInput, bank.getSecretKeyHash());
+        String expectedHash = HmacUtils.hmacSha256(hashInput, hashSecretKey);
 
         return expectedHash.equals(requestHash);
     }

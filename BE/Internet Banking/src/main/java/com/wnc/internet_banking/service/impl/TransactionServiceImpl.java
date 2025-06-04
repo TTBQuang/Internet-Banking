@@ -10,7 +10,9 @@ import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.Otp;
 import com.wnc.internet_banking.entity.Transaction;
 import com.wnc.internet_banking.entity.User;
+import com.wnc.internet_banking.entity.*;
 import com.wnc.internet_banking.repository.AccountRepository;
+import com.wnc.internet_banking.repository.RecipientRepository;
 import com.wnc.internet_banking.repository.TransactionRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import com.wnc.internet_banking.service.TransactionService;
@@ -47,10 +49,10 @@ public class TransactionServiceImpl implements TransactionService {
     private final DebtReminderServiceImpl debtReminderService;
 
     private final ModelMapper modelMapper;
+    private final RecipientRepository recipientRepository;
 
     // Create transaction object and send otp
     private Transaction createTransactionAndSendOtp(
-            UUID senderAccountId,
             UUID receiverAccountId,
             Double amount,
             String content,
@@ -60,7 +62,7 @@ public class TransactionServiceImpl implements TransactionService {
         User sender = userRepository.findById(senderUserId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Account senderAccount = accountRepository.findByAccountIdAndUser(senderAccountId, sender)
+        Account senderAccount = accountRepository.findByUser(sender)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sender account"));
 
         Account receiverAccount = accountRepository.findById(receiverAccountId)
@@ -136,11 +138,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public UUID initiateInternalTransfer(InternalTransferRequest internalTransferRequest, UUID userId) {
-
+        Account account = accountRepository.findByAccountNumber(internalTransferRequest.getReceiverAccountNumber())
+                .orElseThrow(() -> new IllegalArgumentException("Recipient account not found"));
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                internalTransferRequest.getSenderAccountId(),
-                internalTransferRequest.getReceiverAccountId(),
+                account.getAccountId(),
                 internalTransferRequest.getAmount(),
                 internalTransferRequest.getContent(),
                 Transaction.Type.MONEY_TRANSFER,
@@ -171,7 +173,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                debtPaymentRequest.getDebtorAccountId(),
                 debtPaymentRequest.getCreditorAccountId(),
                 debtReminderDto.getAmount(),
                 debtPaymentRequest.getContent(),

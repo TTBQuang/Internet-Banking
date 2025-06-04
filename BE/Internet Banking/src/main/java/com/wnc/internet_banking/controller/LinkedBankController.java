@@ -5,6 +5,7 @@ import com.wnc.internet_banking.dto.request.account.AccountInfoRequestDto;
 import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferRequestDto;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.account.AccountDto;
+import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.service.LinkedBankService;
 import com.wnc.internet_banking.util.RSAUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +46,7 @@ public class LinkedBankController {
         }
 
         // Get account info
-        AccountDto accountInfo = linkedBankService.getAccountInfo(accountInfoRequestDto.getAccountNumber());
+        AccountResponseDto accountInfo = linkedBankService.getAccountInfo(accountInfoRequestDto.getAccountNumber());
 
         // Serialize response data
         String dataString = objectMapper.writeValueAsString(accountInfo);

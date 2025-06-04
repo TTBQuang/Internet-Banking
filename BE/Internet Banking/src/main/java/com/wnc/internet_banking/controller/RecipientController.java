@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -49,6 +50,14 @@ public class RecipientController {
         return ResponseEntity.ok(BaseResponse.data(recipients));
     }
 
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<List<RecipientDto>>> getAllRecipients() {
+        UUID userId = SecurityUtil.getCurrentUserId();
+        List<RecipientDto> recipients = recipientService.getRecipientsByUser(userId);
+        return ResponseEntity.ok(BaseResponse.data(recipients));
+    }
 
     @PutMapping("/{id}")
     @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name) and hasRole('CUSTOMER')")

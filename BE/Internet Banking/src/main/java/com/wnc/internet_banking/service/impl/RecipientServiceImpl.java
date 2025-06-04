@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -104,6 +105,14 @@ public class RecipientServiceImpl implements RecipientService {
         }
 
         return recipients.map(recipient -> modelMapper.map(recipient, RecipientDto.class));
+    }
+
+    @Override
+    public List<RecipientDto> getRecipientsByUser(UUID userId) {
+        List<Recipient> recipients = recipientRepository.findAllByOwner_UserId(userId);
+        return recipients.stream()
+                .map(recipient -> modelMapper.map(recipient, RecipientDto.class))
+                .toList();
     }
 
     @Override

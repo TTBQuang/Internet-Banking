@@ -1,6 +1,7 @@
 package com.wnc.internet_banking.service.impl;
 
 import com.wnc.internet_banking.dto.response.account.AccountDto;
+import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.User;
 import com.wnc.internet_banking.repository.AccountRepository;
@@ -28,6 +29,17 @@ public class AccountServiceImpl implements AccountService {
             return modelMapper.map(account, AccountDto.class);
         }
         throw new EntityNotFoundException("Account not found for user ID: " + userId);
+    }
+
+    @Override
+    public AccountResponseDto getAccountByAccountNumber(String accountNumber) {
+        Account account= accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new EntityNotFoundException("Account not found with account number: " + accountNumber));
+
+        AccountResponseDto accountDto = new AccountResponseDto();
+        accountDto.setAccountNumber(account.getAccountNumber());
+        accountDto.setFullName(account.getUser().getFullName());
+        return accountDto;
     }
 
     @Override

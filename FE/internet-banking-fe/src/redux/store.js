@@ -8,6 +8,7 @@ import recipientsReducer from './recipientsSlice';
 import debtRemindersReducer from './debtRemindersSlice';
 import transactionsReducer from './transactionsSlice';
 import notificationsReducer from './notificationsSlice';
+import transfersReducer from "./transferSlice";
 
 export const store = configureStore({
   reducer: {
@@ -19,5 +20,6 @@ export const store = configureStore({
     debtReminders: debtRemindersReducer,
     transactions: transactionsReducer,
     notifications: notificationsReducer,
+    transfers: transfersReducer,
   },
 });
