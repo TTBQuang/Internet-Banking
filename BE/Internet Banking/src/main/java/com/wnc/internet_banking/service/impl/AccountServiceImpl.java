@@ -1,13 +1,12 @@
 package com.wnc.internet_banking.service.impl;
 
-import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.User;
 import com.wnc.internet_banking.repository.AccountRepository;
 import com.wnc.internet_banking.service.AccountService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;

@@ -5,10 +5,12 @@ import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionReques
 import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
+import com.wnc.internet_banking.dto.response.transaction.TransactionDto;
 import com.wnc.internet_banking.entity.Transaction;
 import com.wnc.internet_banking.service.TransactionService;
 import com.wnc.internet_banking.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,22 +40,60 @@ public class TransactionController {
         return ResponseEntity.ok(BaseResponse.data(transactions));
     }
 
+    @GetMapping("/transfer/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<Page<TransactionDto>>> getCurrentUserTransferTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        Page<TransactionDto> transactions = transactionService.getTransferTransactionsByUser(userId, page, size);
+
+        return ResponseEntity.ok(BaseResponse.data(transactions));
+    }
+
+    @GetMapping("/received/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<Page<TransactionDto>>> getCurrentUserReceivedTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        Page<TransactionDto> transactions = transactionService.getReceivedTransactionsByUser(userId, page, size);
+
+        return ResponseEntity.ok(BaseResponse.data(transactions));
+    }
+
+    @GetMapping("/debt-payment/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<Page<TransactionDto>>> getCurrentUserDebtPaymentTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        Page<TransactionDto> transactions = transactionService.getDebtPaymentTransactionsByUser(userId, page, size);
+
+        return ResponseEntity.ok(BaseResponse.data(transactions));
+    }
 
     @PostMapping("/internal-transfers")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<BaseResponse<UUID>> initiateInternalTransfer (
+    public ResponseEntity<BaseResponse<UUID>> initiateInternalTransfer(
             @RequestBody InternalTransferRequest internalTransferRequest
     ) {
-       UUID userId = SecurityUtil.getCurrentUserId();
+        UUID userId = SecurityUtil.getCurrentUserId();
 
-       UUID transactionId = transactionService.initiateInternalTransfer(internalTransferRequest, userId);
+        UUID transactionId = transactionService.initiateInternalTransfer(internalTransferRequest, userId);
 
-       return ResponseEntity.ok(BaseResponse.data(transactionId));
+        return ResponseEntity.ok(BaseResponse.data(transactionId));
     }
 
     @PostMapping("/internal-transfers/{transactionId}/confirm")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<BaseResponse<?>> confirmInternalTransfer (
+    public ResponseEntity<BaseResponse<?>> confirmInternalTransfer(
             @PathVariable UUID transactionId,
             @RequestBody ConfirmTransactionRequest confirmTransactionRequest
     ) {
@@ -66,7 +106,7 @@ public class TransactionController {
 
     @PostMapping("/debt-payments")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<BaseResponse<UUID>> initiateDebtPayment (
+    public ResponseEntity<BaseResponse<UUID>> initiateDebtPayment(
             @RequestBody DebtPaymentRequest debtPaymentRequest
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
@@ -78,7 +118,7 @@ public class TransactionController {
 
     @PostMapping("/debt-payments/{transactionId}/confirm")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<BaseResponse<?>> confirmDebtPayment (
+    public ResponseEntity<BaseResponse<?>> confirmDebtPayment(
             @PathVariable UUID transactionId,
             @RequestBody ConfirmDebtPaymentRequest confirmDebtPaymentRequest
     ) {

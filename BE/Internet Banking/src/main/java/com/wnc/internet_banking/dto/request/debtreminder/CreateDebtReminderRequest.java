@@ -10,9 +10,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class CreateDebtReminderRequest {
-    private UUID debtorAccountId;
+    private String debtorAccountNumber;
 
-    @Positive
+    @Positive(message = "Amount must be positive")
     private Double amount;
 
     private String content;

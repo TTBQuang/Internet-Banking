@@ -6,6 +6,7 @@ import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.debtreminder.DebtReminderDto;
 import com.wnc.internet_banking.service.DebtReminderService;
 import com.wnc.internet_banking.util.SecurityUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class DebtReminderController {
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
     ResponseEntity<BaseResponse<DebtReminderDto>> createDebtReminder (
-            @RequestBody CreateDebtReminderRequest createDebtReminderRequest
+            @Valid @RequestBody CreateDebtReminderRequest createDebtReminderRequest
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
 
@@ -35,24 +36,59 @@ public class DebtReminderController {
     }
 
     @GetMapping
-    ResponseEntity<BaseResponse<Page<DebtReminderDto>>> getDebtReminders(
+    ResponseEntity<BaseResponse<Page<DebtReminderDto>>> getAllDebtReminders(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String query
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
 
-        Page<DebtReminderDto> debtReminders = debtReminderService.getDebtRemindersByUser(userId, page, size);
+        Page<DebtReminderDto> debtReminders;
+        // If query is provided, filter by query
+        if (query != null && !query.isEmpty()) {
+            debtReminders = debtReminderService.searchAllDebtRemindersByUser(userId, query, page, size);
+        } else {
+            debtReminders = debtReminderService.getAllDebtRemindersByUser(userId, page, size);
+        }
+
+        return ResponseEntity.ok(BaseResponse.data(debtReminders));
+    }
+
+    @GetMapping("/sent")
+    ResponseEntity<BaseResponse<Page<DebtReminderDto>>> getSentDebtReminders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String query
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        Page<DebtReminderDto> debtReminders;
+        // If query is provided, filter by query
+        if (query != null && !query.isEmpty()) {
+            debtReminders = debtReminderService.searchSentDebtRemindersByUser(userId, query, page, size);
+        } else {
+            debtReminders = debtReminderService.getSentDebtRemindersByUser(userId, page, size);
+        }
+
         return ResponseEntity.ok(BaseResponse.data(debtReminders));
     }
 
     @GetMapping("/received")
-    ResponseEntity<BaseResponse<Page<DebtReminderDto>>> getReceivedDebtReminder(
+    ResponseEntity<BaseResponse<Page<DebtReminderDto>>> getReceivedDebtReminders(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String query
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
 
-        Page<DebtReminderDto> debtReminders = debtReminderService.getReceivedDebtRemindersByUser(userId, page, size);
+        Page<DebtReminderDto> debtReminders;
+        // If query is provided, filter by query
+        if( query != null && !query.isEmpty()) {
+            debtReminders = debtReminderService.searchReceivedDebtRemindersByUser(userId, query, page, size);
+        } else {
+            debtReminders = debtReminderService.getReceivedDebtRemindersByUser(userId, page, size);
+        }
+
         return ResponseEntity.ok(BaseResponse.data(debtReminders));
     }
 

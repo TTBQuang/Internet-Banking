@@ -5,6 +5,7 @@ import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionReques
 import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
 import com.wnc.internet_banking.dto.response.debtreminder.DebtReminderDto;
+import com.wnc.internet_banking.dto.response.transaction.TransactionDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.Otp;
 import com.wnc.internet_banking.entity.Transaction;
@@ -17,6 +18,11 @@ import com.wnc.internet_banking.util.EmailTemplate;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +45,8 @@ public class TransactionServiceImpl implements TransactionService {
     private final EmailServiceImpl emailService;
 
     private final DebtReminderServiceImpl debtReminderService;
+
+    private final ModelMapper modelMapper;
 
     // Create transaction object and send otp
     private Transaction createTransactionAndSendOtp(
@@ -90,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     private void confirmTransaction(UUID transactionId, String otpCode, UUID userId) {
-        if(!otpService.verifyOtp(userId, otpCode, Otp.Purpose.TRANSACTION)) {
+        if (!otpService.verifyOtp(userId, otpCode, Otp.Purpose.TRANSACTION)) {
             throw new IllegalArgumentException("Invalid OTP");
         }
 
@@ -186,8 +194,54 @@ public class TransactionServiceImpl implements TransactionService {
         debtReminderService.confirmDebtPayment(confirmDebtPaymentRequest.getDebtReminderId());
     }
 
+    @Override
     public List<Transaction> getTransactionHistory(String accountNumber) {
         return transactionRepository.findBySenderAccountNumberOrReceiverAccountNumber(accountNumber, accountNumber);
 
+    }
+
+    @Override
+    public Page<TransactionDto> getTransferTransactionsByUser(UUID userId, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Account account = accountRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found for user"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Transaction> transactions = transactionRepository.findBySenderAccountNumberAndType(account.getAccountNumber(), Transaction.Type.MONEY_TRANSFER, pageable);
+
+        return transactions.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
+    }
+
+    @Override
+    public Page<TransactionDto> getReceivedTransactionsByUser(UUID userId, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Account account = accountRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found for user"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Transaction> transactions = transactionRepository.findByReceiverAccountNumber(account.getAccountNumber(), pageable);
+
+        return transactions.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
+    }
+
+    @Override
+    public Page<TransactionDto> getDebtPaymentTransactionsByUser(UUID userId, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Account account = accountRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found for user"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Transaction> transactions = transactionRepository.findBySenderAccountNumberAndType(account.getAccountNumber(), Transaction.Type.DEBT_PAYMENT, pageable);
+
+        return transactions.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
     }
 }
