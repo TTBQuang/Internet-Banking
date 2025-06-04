@@ -7,6 +7,7 @@ import changePasswordReducer from './changePasswordSlice';
 import recipientsReducer from './recipientsSlice';
 import debtRemindersReducer from './debtRemindersSlice';
 import transactionsReducer from './transactionsSlice';
+import notificationsReducer from './notificationsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -17,5 +18,6 @@ export const store = configureStore({
     recipients: recipientsReducer,
     debtReminders: debtRemindersReducer,
     transactions: transactionsReducer,
+    notifications: notificationsReducer,
   },
 });
