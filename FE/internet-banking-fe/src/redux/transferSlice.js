@@ -16,6 +16,22 @@ export const initiateInternalTransfer = createAsyncThunk(
   }
 );
 
+export const confirmInternalTransfer = createAsyncThunk(
+  'transaction/confirmInternalTransfer',
+  async ({ transactionId, otp }, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post(
+        `/transactions/internal-transfers/${transactionId}/confirm`,
+        { otpCode: otp }
+      );
+      return response.message;
+    } catch (err) {
+      console.log(err.message);
+      return rejectWithValue(err.message || 'Failed to confirm transaction');
+    }
+  }
+);
+
 const transferSlice = createSlice({
   name: 'transfer',
   initialState: {
@@ -37,7 +53,18 @@ const transferSlice = createSlice({
       .addCase(initiateInternalTransfer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-      });
+      })
+      .addCase(confirmInternalTransfer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(confirmInternalTransfer.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(confirmInternalTransfer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });;
   },
 });
 

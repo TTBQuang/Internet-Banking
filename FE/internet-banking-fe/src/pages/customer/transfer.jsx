@@ -9,11 +9,12 @@ import { Textarea } from "../../components/ui/textarea"
 import { ArrowRight, Loader2, Search, User, CheckCircle2 } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchAllRecipients } from "../../redux/recipientsSlice"
-import { initiateInternalTransfer } from "../../redux/transferSlice"
+import { initiateInternalTransfer, confirmInternalTransfer } from "../../redux/transferSlice"
 
 export default function TransferPage() {
   const dispatch = useDispatch();
   const recipients = useSelector(state => state.recipients.recipients);
+  const transactionId = useSelector((state) => state.transfers.transactionId);
 
   const [step, setStep] = useState(1)
   const [transferType, setTransferType] = useState("recipient")
@@ -24,8 +25,12 @@ export default function TransferPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [isVerifying, setIsVerifying] = useState(false)
   const [isTransferComplete, setIsTransferComplete] = useState(false)
-  const [transactionId, setTransactionId] = useState("")
   const [error, setError] = useState("");
+
+  const setStepAndClearError = (step) => {
+    setError("");
+    setStep(step);
+  }
 
   // Mock recipients data
   useEffect(() => {
@@ -87,10 +92,16 @@ export default function TransferPage() {
     setError("");
     setIsVerifying(true)
     // Simulate verification
-    setTimeout(() => {
-      setIsVerifying(false)
-      setIsTransferComplete(true)
-    }, 1500)
+    dispatch(confirmInternalTransfer({ transactionId, otp: otp.join("") }))
+    .unwrap()
+    .then(() => {
+      setIsVerifying(false);
+      setIsTransferComplete(true);
+    })
+    .catch((err) => {
+      setIsVerifying(false);
+      setError(err);
+    });
   }
 
   // Handle recipient selection
@@ -123,19 +134,13 @@ export default function TransferPage() {
 
     dispatch(initiateInternalTransfer(payload))
       .unwrap()
-      .then((transactionId) => {
-        setTransactionId(transactionId);
+      .then(() => {
         setStep(3);
       })
       .catch((err) => {
         setError(err)
       });
   };
-
-  const setStepAndClearError = (step) => {
-    setError("");
-    setStep(step);  
-  }
 
   return (
     <DashboardLayout>
@@ -175,8 +180,8 @@ export default function TransferPage() {
                                 <div
                                   key={recipient.recipientId}
                                   className={`p-4 border rounded-lg cursor-pointer transition-colors ${recipientInfo?.recipientId === recipient.recipientId
-                                      ? "border-blue-500 bg-blue-50"
-                                      : "hover:bg-gray-50"
+                                    ? "border-blue-500 bg-blue-50"
+                                    : "hover:bg-gray-50"
                                     }`}
                                   onClick={() => handleSelectRecipient(recipient)}
                                 >
