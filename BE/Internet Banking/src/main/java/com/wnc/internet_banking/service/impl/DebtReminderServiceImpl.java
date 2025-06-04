@@ -72,7 +72,7 @@ public class DebtReminderServiceImpl implements DebtReminderService {
         User creditor = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Account debtorAccount = accountRepository.findById(createDebtReminderRequest.getDebtorAccountId())
+        Account debtorAccount = accountRepository.findByAccountNumber(createDebtReminderRequest.getDebtorAccountNumber())
                 .orElseThrow(() -> new IllegalArgumentException("Debtor account not found"));
 
         // Create Debt reminder
@@ -106,12 +106,45 @@ public class DebtReminderServiceImpl implements DebtReminderService {
     }
 
     @Override
-    public Page<DebtReminderDto> getDebtRemindersByUser(UUID userId, int page, int size) {
+    public Page<DebtReminderDto> getAllDebtRemindersByUser(UUID userId, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<DebtReminder> debtReminders = debtReminderRepository.findByCreditorOrDebtorAccount_User(user, user, pageable);
+
+        return debtReminders.map(debtReminder -> modelMapper.map(debtReminder, DebtReminderDto.class));
+    }
+
+    @Override
+    public Page<DebtReminderDto> searchAllDebtRemindersByUser(UUID userId, String query, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<DebtReminder> debtReminders = debtReminderRepository.searchByUserAndKeyword(user, query, pageable);
+
+        return debtReminders.map(debtReminder -> modelMapper.map(debtReminder, DebtReminderDto.class));
+    }
+
+    @Override
+    public Page<DebtReminderDto> getSentDebtRemindersByUser(UUID userId, int page, int size) {
         User creditor = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<DebtReminder> debtReminders = debtReminderRepository.findByCreditor(creditor, pageable);
+
+        return debtReminders.map(debtReminder -> modelMapper.map(debtReminder, DebtReminderDto.class));
+    }
+
+    @Override
+    public Page<DebtReminderDto> searchSentDebtRemindersByUser(UUID userId, String query, int page, int size) {
+        User creditor = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<DebtReminder> debtReminders = debtReminderRepository.searchSentDebtReminders(creditor, query, pageable);
 
         return debtReminders.map(debtReminder -> modelMapper.map(debtReminder, DebtReminderDto.class));
     }
@@ -126,6 +159,18 @@ public class DebtReminderServiceImpl implements DebtReminderService {
 
         return debtReminders.map(debtReminder -> modelMapper.map(debtReminder, DebtReminderDto.class));
     }
+
+    @Override
+    public Page<DebtReminderDto> searchReceivedDebtRemindersByUser(UUID userId, String query, int page, int size) {
+        User debtor = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<DebtReminder> debtReminders = debtReminderRepository.searchReceivedDebtReminders(debtor, query, pageable);
+
+        return debtReminders.map(debtReminder -> modelMapper.map(debtReminder, DebtReminderDto.class));
+    }
+
 
     @Transactional
     @Override

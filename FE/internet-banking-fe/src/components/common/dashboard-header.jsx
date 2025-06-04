@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, ChevronDown, Search } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/userSlice";
@@ -34,53 +34,44 @@ import {
   changePassword,
   resetChangePasswordState,
 } from "@/redux/changePasswordSlice";
+import {
+  fetchNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "@/redux/notificationsSlice";
+import { format } from "date-fns";
 
 export default function DashboardHeader() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const fullName = useSelector((state) => state.user.fullName);
   const {
     loading: changeLoading,
     error: changeError,
     success: changeSuccess,
   } = useSelector((state) => state.changePassword);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Money Received",
-      description: "You received ₫15,000,000 from Tran Van B",
-      time: "10 minutes ago",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Transfer Successful",
-      description: "Your transfer of ₫5,000,000 to Le Thi C was successful",
-      time: "2 hours ago",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Security Alert",
-      description: "New login detected from Ho Chi Minh City",
-      time: "Yesterday",
-      read: true,
-    },
-  ]);
+  
+  const { items: notifications, loading: notificationsLoading } = useSelector(
+    (state) => state.notifications
+  );
+
+  // Fetch notifications when component mounts
+  useEffect(() => {
+    dispatch(fetchNotifications());
+  }, [dispatch]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map((notification) =>
-        notification.id === id ? { ...notification, read: true } : notification
-      )
-    );
+  const handleNotificationClick = async (notification) => {
+    // Update state and call API in background
+    dispatch(markNotificationAsRead(notification.notificationId));
+    
+    // Navigate to debt reminders tab within customer dashboard
+    navigate("/customer/dashboard/debt-reminders");
   };
 
-  const markAllAsRead = () => {
-    setNotifications(
-      notifications.map((notification) => ({ ...notification, read: true }))
-    );
+  const handleMarkAllAsRead = async () => {
+    await dispatch(markAllNotificationsAsRead());
   };
 
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -100,6 +91,21 @@ export default function DashboardHeader() {
     }
   };
 
+  const formatNotificationTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+    
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} minutes ago`;
+    } else if (diffInMinutes < 1440) {
+      const hours = Math.floor(diffInMinutes / 60);
+      return `${hours} hours ago`;
+    } else {
+      return format(date, "MMM d, yyyy");
+    }
+  };
+
   return (
     <>
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-white px-6">
@@ -116,38 +122,50 @@ export default function DashboardHeader() {
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Notifications</SheetTitle>
+            <SheetContent className="w-[380px] sm:w-[400px]">
+              <SheetHeader className="space-y-0.5 px-4 pb-1">
+                <SheetTitle className="text-xl">Notifications</SheetTitle>
                 <SheetDescription>
                   <Button
                     variant="link"
                     size="sm"
-                    className="p-0 h-auto"
-                    onClick={markAllAsRead}
+                    className="p-0 h-auto text-muted-foreground hover:text-primary"
+                    onClick={handleMarkAllAsRead}
                   >
                     Mark all as read
                   </Button>
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-4 space-y-4">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`rounded-lg p-3 ${
-                      notification.read ? "bg-white" : "bg-blue-50"
-                    }`}
-                    onClick={() => markAsRead(notification.id)}
-                  >
-                    <div className="font-medium">{notification.title}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {notification.description}
+              <div className="mt-2 px-4">
+                <div className="space-y-3">
+                  {notificationsLoading ? (
+                    <div className="text-center text-muted-foreground">
+                      Loading notifications...
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {notification.time}
+                  ) : notifications.length === 0 ? (
+                    <div className="text-center text-muted-foreground">
+                      No notifications
                     </div>
-                  </div>
-                ))}
+                  ) : (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.notificationId}
+                        className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                          notification.read ? "bg-white hover:bg-gray-50" : "bg-blue-50 hover:bg-blue-100"
+                        }`}
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="font-semibold text-[15px]">{notification.title}</div>
+                        <div className="mt-1 text-[14px] text-muted-foreground">
+                          {notification.content}
+                        </div>
+                        <div className="mt-2 text-[13px] text-muted-foreground">
+                          {formatNotificationTime(notification.createdAt)}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>

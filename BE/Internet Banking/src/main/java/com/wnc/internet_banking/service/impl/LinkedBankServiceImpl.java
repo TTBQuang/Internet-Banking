@@ -1,7 +1,7 @@
 package com.wnc.internet_banking.service.impl;
 
 import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferRequestDto;
-import com.wnc.internet_banking.dto.response.auth.AccountDto;
+import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.LinkedBank;
@@ -15,11 +15,9 @@ import com.wnc.internet_banking.util.RSAUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Optional;
 
 @Service("linkedBankService")
 @AllArgsConstructor
