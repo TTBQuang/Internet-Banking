@@ -1,23 +1,23 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import apiClient from "../services/apiClient";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import apiClient from '../services/apiClient';
 
 export const changePassword = createAsyncThunk(
-  "changePassword/changePassword",
+  'changePassword/changePassword',
   async ({ oldPassword, newPassword }, { rejectWithValue }) => {
     try {
-      const res = await apiClient.post("/auth/change-password", {
+      const res = await apiClient.post('/auth/change-password', {
         oldPassword,
         newPassword,
       });
-      return res.message || "Password changed successfully";
+      return res.message || 'Password changed successfully';
     } catch (err) {
-      return rejectWithValue(err.message || "Failed to change password");
+      return rejectWithValue(err.message || 'Failed to change password');
     }
   }
 );
 
 const changePasswordSlice = createSlice({
-  name: "changePassword",
+  name: 'changePassword',
   initialState: {
     loading: false,
     error: null,

@@ -22,6 +22,9 @@ import { Input } from '../ui/input';
 import { useDebounce } from 'use-debounce';
 import { toast } from 'react-toastify';
 import DeleteDebtReminderDialog from './DeleteDebtReminderDialog';
+import PayDebtConfirmDialog from './PayDebtConfirmDialog';
+import { setDebtReminder } from '@/redux/debtPaymentSlice';
+import { useNavigate } from 'react-router-dom';
 
 const formatCurrency = (amount) => {
   return `₫ ${Number(amount).toLocaleString('en-US')}`;
@@ -45,11 +48,15 @@ const DebtRemindersListCard = ({ type }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
 
+  // Dialogs
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedDebtReminder, setSelectedDebtReminder] = useState(null);
 
   const [deleteError, setDeleteError] = useState(null);
   const [deleteContent, setDeleteContent] = useState('');
+
+  const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
+  const [payError, setPayError] = useState(null);
   // Reset page to 1 when search term or type changes
   useEffect(() => {
     dispatch(setPage(1));
@@ -89,7 +96,7 @@ const DebtRemindersListCard = ({ type }) => {
   //   return <div>Loading...</div>;
   // }
 
-  const handleDelete = (debtReminder) => {
+  const handleDeleteClick = (debtReminder) => {
     setSelectedDebtReminder(debtReminder);
     setIsDeleteDialogOpen(true);
   };
@@ -132,8 +139,24 @@ const DebtRemindersListCard = ({ type }) => {
     }
   };
 
-  const handlePay = (debtReminder) => {
-    console.log(debtReminder);
+  const handlePayClick = (debtReminder) => {
+    setSelectedDebtReminder(debtReminder);
+    setIsPayDialogOpen(true);
+  };
+
+  const navigate = useNavigate();
+  const confirmPay = () => {
+    try {
+      dispatch(setDebtReminder(selectedDebtReminder));
+      // Navigate to Transfer page
+      navigate('/customer/dashboard/transfer');
+
+      setIsPayDialogOpen(false);
+      setSelectedDebtReminder(null);
+      setPayError(null);
+    } catch (err) {
+      setPayError(err.message);
+    }
   };
 
   if (error) {
@@ -271,19 +294,20 @@ const DebtRemindersListCard = ({ type }) => {
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleDelete(debtReminder)}
+                            onClick={() => handleDeleteClick(debtReminder)}
                             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded cursor-pointer"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
-                          {type === 'received' && (
-                            <button
-                              onClick={() => handlePay(debtReminder)}
-                              className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded cursor-pointer"
-                            >
-                              <CreditCard className="h-4 w-4" />
-                            </button>
-                          )}
+                          {type === 'received' &&
+                            debtReminder.status === 'PENDING' && (
+                              <button
+                                onClick={() => handlePayClick(debtReminder)}
+                                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded cursor-pointer"
+                              >
+                                <CreditCard className="h-4 w-4" />
+                              </button>
+                            )}
                         </div>
                       </td>
                     </tr>
@@ -325,6 +349,17 @@ const DebtRemindersListCard = ({ type }) => {
         error={deleteError}
         content={deleteContent}
         setContent={setDeleteContent}
+      />
+      <PayDebtConfirmDialog
+        isOpen={isPayDialogOpen}
+        onClose={() => {
+          setIsPayDialogOpen(false);
+          setPayError(null);
+        }}
+        onConfirm={confirmPay}
+        error={payError}
+        debtReminder={selectedDebtReminder}
+        formatCurrency={formatCurrency}
       />
     </Card>
   );

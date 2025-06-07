@@ -239,7 +239,9 @@ const TransactionListCard = () => {
                       </td>
                       <td className="p-4 ">{transaction.content}</td>
                       <td className="p-4 font-medium">
-                        {transaction.receiverAccountNumber}
+                        {filterType === 'received'
+                          ? transaction.senderAccountNumber
+                          : transaction.receiverAccountNumber}
                       </td>
                       <td className="p-4">
                         {filterType === 'received'

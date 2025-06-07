@@ -104,7 +104,7 @@ public class TransactionController {
         return ResponseEntity.ok(BaseResponse.message("Transaction confirmed successfully"));
     }
 
-    @PostMapping("/debt-payments")
+    @PostMapping("/debt-payment")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<UUID>> initiateDebtPayment(
             @RequestBody DebtPaymentRequest debtPaymentRequest
@@ -116,7 +116,7 @@ public class TransactionController {
         return ResponseEntity.ok(BaseResponse.data(transactionId));
     }
 
-    @PostMapping("/debt-payments/{transactionId}/confirm")
+    @PostMapping("/debt-payment/{transactionId}/confirm")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<?>> confirmDebtPayment(
             @PathVariable UUID transactionId,

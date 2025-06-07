@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface AccountService {
     AccountDto getAccountByUserId(UUID userId);
 
+    String getAccountNumberByUserId(UUID userId);
+
     AccountResponseDto getAccountByAccountNumber(String accountNumber);
 
     Account createAccountForUser(User user);
