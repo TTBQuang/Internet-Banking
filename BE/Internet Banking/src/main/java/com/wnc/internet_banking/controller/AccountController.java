@@ -1,6 +1,5 @@
 package com.wnc.internet_banking.controller;
 
-import com.wnc.internet_banking.dto.request.account.AccountInfoRequestDto;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
@@ -21,10 +20,17 @@ public class AccountController {
 
     @GetMapping
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<BaseResponse<AccountDto>> getAccountByUserId() {
+    public ResponseEntity<BaseResponse<AccountDto>> getCurrentUserAccount() {
         UUID userId = SecurityUtil.getCurrentUserId();
         AccountDto accountDTO = accountService.getAccountByUserId(userId);
         return ResponseEntity.ok(BaseResponse.data(accountDTO));
+    }
+
+    @GetMapping("/account-number")
+    public ResponseEntity<BaseResponse<String>> getAccountNumberByUserId(@RequestParam UUID userId) {
+        String accountNumber = accountService.getAccountNumberByUserId(userId);
+
+        return ResponseEntity.ok(BaseResponse.data(accountNumber));
     }
 
     @GetMapping("/{accountNumber}")

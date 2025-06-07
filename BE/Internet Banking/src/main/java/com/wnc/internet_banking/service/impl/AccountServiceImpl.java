@@ -32,6 +32,15 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public String getAccountNumberByUserId(UUID userId) {
+        Optional<Account> accountOptional = accountRepository.findByUser_UserId(userId);
+        if (accountOptional.isPresent()) {
+            return accountOptional.get().getAccountNumber();
+        }
+        throw new EntityNotFoundException("Account not found for user ID: " + userId);
+    }
+
+    @Override
     public AccountResponseDto getAccountByAccountNumber(String accountNumber) {
         Account account= accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new EntityNotFoundException("Account not found with account number: " + accountNumber));

@@ -169,11 +169,14 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Debt reminder already paid");
         }
 
+        Account creditor = accountRepository.findByAccountNumber(debtPaymentRequest.getCreditorAccountNumber())
+                .orElseThrow(() -> new IllegalArgumentException("Creditor account not found"));
+
         DebtReminderDto debtReminderDto = debtReminderService.getDebtReminderById(debtPaymentRequest.getDebtReminderId());
 
         // Create new transaction and send otp
         Transaction transaction = createTransactionAndSendOtp(
-                debtPaymentRequest.getCreditorAccountId(),
+                creditor.getAccountId(),
                 debtReminderDto.getAmount(),
                 debtPaymentRequest.getContent(),
                 Transaction.Type.DEBT_PAYMENT,
