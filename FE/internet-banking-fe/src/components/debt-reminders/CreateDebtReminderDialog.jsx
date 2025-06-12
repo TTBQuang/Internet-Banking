@@ -16,7 +16,10 @@ import { Plus, Search } from 'lucide-react';
 import { ChevronsUpDown } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'use-debounce';
-import { fetchRecipients } from '@/redux/recipientsSlice';
+import {
+  fetchAllInternalRecipients,
+  fetchRecipients,
+} from '@/redux/recipientsSlice';
 import {
   clearError,
   createDebtReminder,
@@ -35,10 +38,6 @@ const CreateDebtReminderDialog = ({ activeTab }) => {
 
   const {
     recipients,
-    currentPage,
-    totalPages,
-    totalElements,
-    pageSize: recipientsPageSize,
     loading: recipientsLoading,
     error: recipientsError,
   } = useSelector((state) => state.recipients);
@@ -49,12 +48,8 @@ const CreateDebtReminderDialog = ({ activeTab }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const params = { page: currentPage, size: recipientsPageSize };
-    if (debouncedSearchTerm) {
-      params.nickname = debouncedSearchTerm;
-    }
-    dispatch(fetchRecipients(params));
-  }, [dispatch, currentPage, recipientsPageSize, debouncedSearchTerm]);
+    dispatch(fetchAllInternalRecipients(debouncedSearchTerm));
+  }, [dispatch, debouncedSearchTerm]);
 
   // Form data
   const [formData, setFormData] = useState({

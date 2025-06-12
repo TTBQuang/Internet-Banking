@@ -11,7 +11,9 @@ import com.wnc.internet_banking.repository.DebtReminderRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import com.wnc.internet_banking.service.DebtReminderService;
 import com.wnc.internet_banking.service.EmailService;
+import com.wnc.internet_banking.service.NotificationService;
 import com.wnc.internet_banking.util.EmailTemplate;
+import com.wnc.internet_banking.util.NotificationTemplate;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,7 +31,7 @@ import java.util.UUID;
 @Service("debtReminderService")
 public class DebtReminderServiceImpl implements DebtReminderService {
 
-    private final EmailService emailService;
+    private final NotificationService notificationService;
 
     private final DebtReminderRepository debtReminderRepository;
 
@@ -55,16 +57,11 @@ public class DebtReminderServiceImpl implements DebtReminderService {
         debtReminder.setPaidAt(LocalDateTime.now());
         debtReminderRepository.save(debtReminder);
 
-        // Send notify email to the creditor
-        try {
-            String emailBody = EmailTemplate.notifyDebtPaymentCompleted(
-                    debtReminder.getCreditor().getFullName(),
-                    debtReminder.getDebtorAccount().getUser().getFullName(),
-                    debtReminder.getAmount());
-            emailService.sendEmail(debtReminder.getCreditor().getEmail(), "Debt Payment Completed", emailBody);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email");
-        }
+        // Notify to the creditor
+        NotificationTemplate notification = NotificationTemplate.debtPaymentCompleted(debtReminder.getDebtorAccount().getUser().getFullName(),
+                debtReminder.getAmount());
+
+        notificationService.createNotification(debtReminder.getCreditor().getUserId(), notification.getTitle(), notification.getContent());
     }
 
     @Override
@@ -180,18 +177,16 @@ public class DebtReminderServiceImpl implements DebtReminderService {
 
         debtReminderRepository.delete(debtReminder);
 
-        // Send notify email to the debtor
-        try {
-            String emailBody = EmailTemplate.notifyDebtReminderCancelledToDebtor(
-                    debtReminder.getDebtorAccount().getUser().getFullName(),
-                    debtReminder.getCreditor().getFullName(),
-                    cancelDebtReminderRequest.getContent()
-            );
-            emailService.sendEmail(debtReminder.getDebtorAccount().getUser().getEmail(), "Debt Reminder Cancelled", emailBody);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email");
-        }
+        // Notify to the debtor
+        NotificationTemplate notification = NotificationTemplate.debtReminderCancelledToDebtor(
+                debtReminder.getCreditor().getFullName(),
+                cancelDebtReminderRequest.getContent()
+        );
 
+        notificationService.createNotification(
+                debtReminder.getDebtorAccount().getUser().getUserId(),
+                notification.getTitle(),
+                notification.getContent());
     }
 
     @Transactional
@@ -208,16 +203,15 @@ public class DebtReminderServiceImpl implements DebtReminderService {
 
         debtReminderRepository.delete(debtReminder);
 
-        // Send notify email to the creditor
-        try {
-            String emailBody = EmailTemplate.notifyDebtReminderCancelledToCreditor(
-                    debtReminder.getCreditor().getFullName(),
-                    debtor.getFullName(),
-                    cancelDebtReminderRequest.getContent()
-            );
-            emailService.sendEmail(debtReminder.getCreditor().getEmail(), "Debt Reminder Cancelled", emailBody);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email");
-        }
+        // Notify to the creditor
+        NotificationTemplate notification = NotificationTemplate.debtReminderCancelledToCreditor(
+                debtReminder.getDebtorAccount().getUser().getFullName(),
+                cancelDebtReminderRequest.getContent()
+        );
+
+        notificationService.createNotification(
+                debtReminder.getCreditor().getUserId(),
+                notification.getTitle(),
+                notification.getContent());
     }
 }

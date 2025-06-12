@@ -1,9 +1,9 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import apiClient from "../services/apiClient";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import apiClient from '../services/apiClient';
 
 // Async thunks
 export const fetchRecipients = createAsyncThunk(
-  "recipients/fetchRecipients",
+  'recipients/fetchRecipients',
   async ({ page = 1, size = 10, nickname }) => {
     let url = `/recipients?page=${page - 1}&size=${size}`;
     if (nickname) {
@@ -22,16 +22,28 @@ export const fetchAllRecipients = createAsyncThunk(
   }
 );
 
+export const fetchAllInternalRecipients = createAsyncThunk(
+  'recipients/fetchAllInternalRecipients',
+  async (nickname) => {
+    let url = '/recipients/all/internal';
+    if (nickname) {
+      url += `?nickname=${encodeURIComponent(nickname)}`;
+    }
+    const response = await apiClient.get(url);
+    return response.data;
+  }
+);
+
 export const addRecipient = createAsyncThunk(
-  "recipients/addRecipient",
+  'recipients/addRecipient',
   async (recipientData) => {
-    const response = await apiClient.post("/recipients", recipientData);
+    const response = await apiClient.post('/recipients', recipientData);
     return response.data;
   }
 );
 
 export const updateRecipient = createAsyncThunk(
-  "recipients/updateRecipient",
+  'recipients/updateRecipient',
   async ({ id, recipientData }) => {
     const response = await apiClient.put(`/recipients/${id}`, recipientData);
     return response.data;
@@ -39,7 +51,7 @@ export const updateRecipient = createAsyncThunk(
 );
 
 export const deleteRecipient = createAsyncThunk(
-  "recipients/deleteRecipient",
+  'recipients/deleteRecipient',
   async (id) => {
     const response = await apiClient.delete(`/recipients/${id}`);
     return { id, message: response.message };
@@ -57,7 +69,7 @@ const initialState = {
 };
 
 const recipientsSlice = createSlice({
-  name: "recipients",
+  name: 'recipients',
   initialState,
   reducers: {
     clearError: (state) => {
@@ -96,6 +108,19 @@ const recipientsSlice = createSlice({
         state.recipients = action.payload;
       })
       .addCase(fetchAllRecipients.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      // Fetch all internal recipients
+      .addCase(fetchAllInternalRecipients.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllInternalRecipients.fulfilled, (state, action) => {
+        state.loading = false;
+        state.recipients = action.payload;
+      })
+      .addCase(fetchAllInternalRecipients.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
