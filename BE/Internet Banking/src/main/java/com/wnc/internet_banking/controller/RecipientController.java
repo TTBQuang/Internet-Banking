@@ -59,6 +59,22 @@ public class RecipientController {
         return ResponseEntity.ok(BaseResponse.data(recipients));
     }
 
+    @GetMapping("/all/internal")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'EMPLOYEE')")
+    public ResponseEntity<BaseResponse<List<RecipientDto>>> getAllIntrnealRecipients(
+            @RequestParam (required = false) String nickname
+    ) {
+        UUID userId = SecurityUtil.getCurrentUserId();
+
+        if (nickname != null && !nickname.isEmpty()) {
+            List<RecipientDto> recipients = recipientService.getAllInternalRecipientsByUserAndNickname(userId, nickname);
+            return ResponseEntity.ok(BaseResponse.data(recipients));
+        }
+
+        List<RecipientDto> recipients = recipientService.getAllInternalRecipientsByUser(userId);
+        return ResponseEntity.ok(BaseResponse.data(recipients));
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name) and hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<RecipientDto>> updateRecipientNickname(

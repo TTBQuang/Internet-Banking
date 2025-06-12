@@ -293,21 +293,24 @@ const DebtRemindersListCard = ({ type }) => {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleDeleteClick(debtReminder)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded cursor-pointer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                          {type === 'received' &&
-                            debtReminder.status === 'PENDING' && (
+                          {debtReminder.status === 'PENDING' && (
+                            <>
                               <button
-                                onClick={() => handlePayClick(debtReminder)}
-                                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded cursor-pointer"
+                                onClick={() => handleDeleteClick(debtReminder)}
+                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded cursor-pointer"
                               >
-                                <CreditCard className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" />
                               </button>
-                            )}
+                              {type === 'received' && (
+                                <button
+                                  onClick={() => handlePayClick(debtReminder)}
+                                  className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded cursor-pointer"
+                                >
+                                  <CreditCard className="h-4 w-4" />
+                                </button>
+                              )}
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

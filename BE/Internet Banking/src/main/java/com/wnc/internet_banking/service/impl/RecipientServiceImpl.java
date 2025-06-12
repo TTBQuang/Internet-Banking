@@ -116,6 +116,24 @@ public class RecipientServiceImpl implements RecipientService {
     }
 
     @Override
+    public List<RecipientDto> getAllInternalRecipientsByUser(UUID userId) {
+        List<Recipient> recipients = recipientRepository.findAllByOwner_UserIdAndBankIsNull(userId);
+
+        return recipients.stream()
+                .map(recipient -> modelMapper.map(recipient, RecipientDto.class))
+                .toList();
+    }
+
+    @Override
+    public List<RecipientDto> getAllInternalRecipientsByUserAndNickname(UUID userId, String nickname) {
+        List<Recipient> recipients = recipientRepository.findAllByOwner_UserIdAndBankIsNullAndNicknameContainingIgnoreCase(userId, nickname);
+
+        return recipients.stream()
+                .map(recipient -> modelMapper.map(recipient, RecipientDto.class))
+                .toList();
+    }
+
+    @Override
     @Transactional
     public RecipientDto updateRecipientNickname(UUID recipientId, RecipientUpdateRequest request) {
         Recipient recipient = recipientRepository.findById(recipientId)

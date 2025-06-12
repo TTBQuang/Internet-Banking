@@ -19,5 +19,9 @@ public interface RecipientService {
 
     List<RecipientDto> getRecipientsByUser(UUID userId);
 
+    List<RecipientDto> getAllInternalRecipientsByUser(UUID userId);
+
+    List<RecipientDto> getAllInternalRecipientsByUserAndNickname(UUID userId, String nickname);
+
     RecipientDto updateRecipientNickname(UUID recipientId, RecipientUpdateRequest request);
 }
