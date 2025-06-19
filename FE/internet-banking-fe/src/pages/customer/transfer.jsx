@@ -34,8 +34,6 @@ import {
   confirmDebtPayment,
   initiateDebtPayment,
 } from '@/redux/debtPaymentSlice';
-import { set } from 'date-fns';
-import { useBeforeUnload } from 'react-router-dom';
 
 export default function TransferPage() {
   const dispatch = useDispatch();
@@ -52,9 +50,19 @@ export default function TransferPage() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isTransferComplete, setIsTransferComplete] = useState(false);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    dispatch(fetchAllRecipients(searchTerm));
+  }, [dispatch, searchTerm]);
+
+  useEffect(() => {
+    setReceiverInfo(null);
+  }, [searchTerm]);
 
   const setStepAndClearError = (step) => {
     setError('');
@@ -177,6 +185,7 @@ export default function TransferPage() {
 
   // Reset the form
   const resetForm = () => {
+    setSearchTerm('');
     setError('');
     setStep(1);
     setTransferType('recipient');
@@ -185,12 +194,14 @@ export default function TransferPage() {
     setDescription('');
     setOtp(['', '', '', '', '', '']);
     setIsTransferComplete(false);
+    setIsConfirming(false);
   };
 
   // Handle confirm transfer
   const handleConfirmTransfer = async () => {
     try {
       setError('');
+      setIsConfirming(true);
 
       const payload = {
         receiverAccountNumber: receiverInfo.accountNumber,
@@ -219,6 +230,8 @@ export default function TransferPage() {
     } catch (err) {
       console.log(err);
       setError(err);
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -264,6 +277,14 @@ export default function TransferPage() {
                       <TabsContent value="recipient" className="space-y-4 mt-4">
                         <div className="space-y-4">
                           <Label>Select a recipient</Label>
+                          <div className="space-y-4">
+                            <Input
+                              type="text"
+                              placeholder="Search by nickname or account number"
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                          </div>
                           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                             {recipients && recipients.length > 0 ? (
                               recipients.map((recipient) => (
@@ -502,7 +523,9 @@ export default function TransferPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 ) : step === 2 ? (
-                  <Button onClick={handleConfirmTransfer}>
+                  <Button 
+                    onClick={handleConfirmTransfer}
+                    disabled={isConfirming}>
                     Confirm Transfer
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
