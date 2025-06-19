@@ -16,9 +16,23 @@ export const fetchRecipients = createAsyncThunk(
 
 export const fetchAllRecipients = createAsyncThunk(
   'recipients/fetchAllRecipients',
-  async () => {
+  async (searchTerm = "") => {
     const response = await apiClient.get('/recipients/all');
-    return response.data;
+    const allRecipients = response.data || [];
+
+    if (!searchTerm) return allRecipients;
+
+    const lower = searchTerm.toLowerCase();
+
+    const filtered = allRecipients.filter(
+      (r) =>
+        r.nickname?.toLowerCase().includes(lower) ||
+        r.accountNumber?.toLowerCase().includes(searchTerm)
+    );
+
+    console.log(filtered);
+
+    return filtered;
   }
 );
 
