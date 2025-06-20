@@ -40,6 +40,11 @@ public class RecipientServiceImpl implements RecipientService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        Optional<Account> userAccountOpt = accountRepository.findByUser_UserId(userId);
+        if (userAccountOpt.isPresent() && userAccountOpt.get().getAccountNumber().equals(request.getAccountNumber())) {
+            throw new IllegalArgumentException("You cannot add yourself as a recipient");
+        }
+
         boolean exists = recipientRepository.existsByOwnerUserIdAndAccountNumberAndBankLinkedBankId(
                 userId, request.getAccountNumber(), request.getBankId()
         );
