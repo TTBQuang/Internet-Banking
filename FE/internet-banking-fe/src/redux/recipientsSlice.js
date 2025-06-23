@@ -27,7 +27,7 @@ export const fetchAllRecipients = createAsyncThunk(
     const filtered = allRecipients.filter(
       (r) =>
         r.nickname?.toLowerCase().includes(lower) ||
-        r.accountNumber?.toLowerCase().includes(searchTerm)
+        r.accountNumber?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     console.log(filtered);
