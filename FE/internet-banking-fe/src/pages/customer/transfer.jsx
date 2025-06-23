@@ -556,8 +556,7 @@ export default function TransferPage() {
               </div>
               <h2 className="text-2xl font-bold mb-2">Transfer Successful!</h2>
               <p className="text-muted-foreground mb-6">
-                You have successfully transferred ₫{formatCurrency(amount)} to{' '}
-                {receiverInfo.name}
+                You have successfully transferred ₫ {formatCurrency(amount)} to {receiverInfo.nickname}
               </p>
               <div className="space-y-4">
                 <Button className="w-full" onClick={resetForm}>
