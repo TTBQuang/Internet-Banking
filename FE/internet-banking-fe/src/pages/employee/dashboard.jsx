@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/ta
 import CustomerManagement from "./CustomerManagement";
 import DepositMoney from "./DepositMoney";
 import TransactionHistory from "./TransactionHistory";
-import DashboardLayout from "../../components/common/dashboard-layout";
+import DashboardLayout from "../../components/common/dashboard-layout-no-sidebar";
 
 const EmployeeDashBoard = () => {
   const [tab, setTab] = useState("customers");

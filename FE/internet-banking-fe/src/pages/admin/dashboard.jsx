@@ -1,10 +1,12 @@
 import React from "react";
+import DashboardLayout from "../../components/common/dashboard-layout-no-sidebar";
+import EmployeeManagement from "./EmployeeManagement";
 
 const AdminDashBoard = () => {
   return (
-    <div>
-      <span>Admin Dashboard</span>
-    </div>
+    <DashboardLayout>
+      <EmployeeManagement />
+    </DashboardLayout>
   );
 };
 
