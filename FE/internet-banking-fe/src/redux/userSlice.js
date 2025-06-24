@@ -56,6 +56,7 @@ const userSlice = createSlice({
     email: null,
     phone: null,
     role: null,
+    userId: null,
     loading: false,
     error: null,
   },
@@ -74,6 +75,7 @@ const userSlice = createSlice({
         state.email = action.payload.user.email;
         state.phone = action.payload.user.phone;
         state.role = action.payload.user.role;
+        state.userId = action.payload.user.userId;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -91,6 +93,7 @@ const userSlice = createSlice({
           email: null,
           phone: null,
           role: null,
+          userId: null,
           loading: false,
           error: null,
         };
@@ -103,6 +106,7 @@ const userSlice = createSlice({
         state.email = null;
         state.phone = null;
         state.role = null;
+        state.userId = null;
       });
   },
 });
