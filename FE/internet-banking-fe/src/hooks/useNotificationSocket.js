@@ -16,30 +16,20 @@ export default function useNotificationSocket() {
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
       onConnect: () => {
-        console.log("WebSocket connected");
-        client.subscribe(`/topic/notifications/${userId}`, (message) => {
-          console.log("New notification received:", message);
-          // Force re-fetch notifications
+        client.subscribe(`/topic/notifications/${userId}`, () => {
+          console.log("receive notifications");
           dispatch(fetchNotifications());
         });
       },
-      onDisconnect: () => {
-        console.log("WebSocket disconnected");
-      },
-      onStompError: (frame) => {
-        console.error("WebSocket error:", frame);
-      }
     });
 
     client.activate();
 
     return () => {
-      if (client.active) {
-        client.deactivate();
-      }
+      console.log("userId in useNotificationSocket", userId);
+    if (!userId) return;
+      client.deactivate();
     };
   }, [userId, dispatch]);
-}
+} 
