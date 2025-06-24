@@ -27,8 +27,6 @@ export default function useNotificationSocket() {
     client.activate();
 
     return () => {
-      console.log("userId in useNotificationSocket", userId);
-    if (!userId) return;
       client.deactivate();
     };
   }, [userId, dispatch]);
