@@ -22,6 +22,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaReady, setCaptchaReady] = useState(false);
   const recaptchaRef = useRef(null);
 
   const dispatch = useDispatch();
@@ -46,6 +47,10 @@ const LoginPage = () => {
       navigate(path);
     }
   }, [role, navigate]);
+
+  useEffect(() => {
+    setCaptchaReady(true);
+  }, []);
 
   // Handle reCAPTCHA change
   const handleCaptchaChange = (token) => {
@@ -153,14 +158,16 @@ const LoginPage = () => {
               />
             </div>
 
-            <div className="recaptcha-container flex justify-center">
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey={RECAPTCHA_SITE_KEY}
-                onChange={handleCaptchaChange}
-                hl="en"
-              />
-            </div>
+            {captchaReady && (
+              <div className="recaptcha-container flex justify-center">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={RECAPTCHA_SITE_KEY}
+                  onChange={handleCaptchaChange}
+                  hl="en"
+                />
+              </div>
+            )}
 
             <Button
               type="submit"

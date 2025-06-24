@@ -157,7 +157,12 @@ export default function DashboardHeader() {
                       >
                         <div className="font-semibold text-[15px]">{notification.title}</div>
                         <div className="mt-1 text-[14px] text-muted-foreground">
-                          {notification.content}
+                          {notification.content.split('\n').map((line, idx) => (
+                            <span key={idx}>
+                              {line}
+                              <br />
+                            </span>
+                          ))}
                         </div>
                         <div className="mt-2 text-[13px] text-muted-foreground">
                           {formatNotificationTime(notification.createdAt)}
