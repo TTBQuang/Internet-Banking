@@ -704,8 +704,8 @@ export default function TransferPage() {
       </div>
 
       {showSaveModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-md mx-auto space-y-4">
             <h2 className="text-lg font-semibold">Save as Recipient</h2>
             <div className="space-y-2">
               <Label htmlFor="nickname">Nickname</Label>
@@ -716,7 +716,11 @@ export default function TransferPage() {
               />
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowSaveModal(false)}>
+              <Button variant="outline" onClick={() => {
+                setShowSaveModal(false); 
+                setIsSavingRecipient(false);
+                setIsRecipientSaved(false);
+              }}>
                 Cancel
               </Button>
               <Button
