@@ -3,8 +3,7 @@ package com.wnc.internet_banking.service.impl;
 import com.wnc.internet_banking.dto.request.user.CustomerRegistrationDto;
 import com.wnc.internet_banking.dto.request.user.EmployeeRegistrationDto;
 import com.wnc.internet_banking.entity.User;
-import com.wnc.internet_banking.repository.AccountRepository;
-import com.wnc.internet_banking.repository.UserRepository;
+import com.wnc.internet_banking.repository.*;
 import com.wnc.internet_banking.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +20,20 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AccountServiceImpl accountService;
+
+    private final OtpRepository otpRepository;
+
+    private final NotificationRepository notificationRepository;
+
+    private final RecipientRepository recipientRepository;
+
+    private final DebtReminderRepository debtReminderRepository;
+
     private final AccountRepository accountRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final AccountServiceImpl accountService;
 
     @Override
     public User createEmployee(EmployeeRegistrationDto dto) {
@@ -75,6 +85,7 @@ public class UserServiceImpl implements UserService {
 
         return mapToCustomerResponse(userRepository.save(user));
     }
+
     @Override
     @Transactional
     public void deleteCustomer(UUID userId) {
@@ -84,9 +95,20 @@ public class UserServiceImpl implements UserService {
         if (user.getRole() != User.Role.CUSTOMER) {
             throw new IllegalArgumentException("Can only delete customers");
         }
+
+        otpRepository.deleteAllByUser_UserId(userId);
+
+        notificationRepository.deleteAllByUser_UserId(userId);
+
+        recipientRepository.deleteAllByOwner_UserId(userId);
+
+        debtReminderRepository.deleteAllByCreditor_UserId(userId);
+
         accountRepository.deleteAllByUser_UserId(userId);
+
         userRepository.deleteById(userId);
     }
+
 
     private User mapToCustomerResponse(User user) {
         User response = new User();
