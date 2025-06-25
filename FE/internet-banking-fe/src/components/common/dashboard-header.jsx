@@ -40,6 +40,8 @@ import {
   markAllNotificationsAsRead,
 } from '@/redux/notificationsSlice';
 import { format } from 'date-fns';
+import apiClient from '@/services/apiClient';
+import { toast } from 'react-toastify';
 
 export default function DashboardHeader() {
   const dispatch = useDispatch();
@@ -54,6 +56,8 @@ export default function DashboardHeader() {
   const { items: notifications, loading: notificationsLoading } = useSelector(
     (state) => state.notifications
   );
+
+  const userId = useSelector((state) => state.user.userId);
 
   // Fetch notifications when component mounts
   useEffect(() => {
@@ -104,6 +108,28 @@ export default function DashboardHeader() {
       return `${hours} hours ago`;
     } else {
       return format(date, 'MMM d, yyyy');
+    }
+  };
+
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      await apiClient.deleteCustomerAccount(userId);
+      navigate('/');
+      toast.success("Your account has been closed. Goodbye!", {
+        autoClose: 2000,
+      });
+    } catch (err) {
+      toast.error("Failed to delete account. Please try again.", {
+        autoClose: 2000,
+      });
+      console.error('Delete account failed:', err);
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteAccount(false);
     }
   };
 
@@ -203,6 +229,10 @@ export default function DashboardHeader() {
                 Change password
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowDeleteAccount(true)}>
+                Close account
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link
                   to="#"
@@ -267,6 +297,35 @@ export default function DashboardHeader() {
               disabled={changeLoading}
             >
               {changeLoading ? 'Changing...' : 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Dialog xác nhận đóng tài khoản */}
+      <Dialog open={showDeleteAccount} onOpenChange={setShowDeleteAccount}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-2xl font-bold text-center">
+              Close Account
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-center">
+            <div className="text-base">Are you sure you want to close your account? This action cannot be undone.</div>
+          </div>
+          <DialogFooter className="flex flex-col gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteAccount(false)}
+              disabled={deleteLoading}
+            >
+              No
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? 'Closing...' : 'Yes, close my account'}
             </Button>
           </DialogFooter>
         </DialogContent>

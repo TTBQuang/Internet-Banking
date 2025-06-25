@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "../redux/store";
 import { logout } from "../redux/userSlice";
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 // Create an axios instance with common configuration
 const apiClient = axios.create({
@@ -93,6 +93,11 @@ const handleLogout = () => {
   localStorage.removeItem("refreshToken");
 };
 
+// Thêm hàm gọi API xóa tài khoản khách hàng
+const deleteCustomerAccount = (userId) => {
+  return apiClient.delete(`/api/customers/${userId}`);
+};
+
 export default {
   get: (endpoint, config = {}) =>
     apiClient.get(endpoint, { ...config, withToken: true }),
@@ -104,4 +109,5 @@ export default {
     apiClient.delete(endpoint, { ...config, withToken: true }),
   patch: (endpoint, data = {}, config = {}) =>
     apiClient.patch(endpoint, data, { ...config, withToken: true }),
+  deleteCustomerAccount,
 };
