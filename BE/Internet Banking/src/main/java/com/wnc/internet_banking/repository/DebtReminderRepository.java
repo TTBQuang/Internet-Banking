@@ -72,5 +72,7 @@ public interface DebtReminderRepository extends JpaRepository<DebtReminder, UUID
     );
 
     void deleteAllByCreditor_UserId(UUID userId);
+
+    void deleteAllByDebtorAccount_User_UserId(UUID userId);
 }
 
