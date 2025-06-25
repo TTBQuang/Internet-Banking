@@ -119,6 +119,9 @@ export default function DashboardHeader() {
     try {
       await apiClient.deleteCustomerAccount(userId);
       navigate('/');
+      toast.success("Your account has been closed. Goodbye!", {
+        autoClose: 2000,
+      });
     } catch (err) {
       toast.error("Failed to delete account. Please try again.", {
         autoClose: 2000,

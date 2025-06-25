@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "../redux/store";
 import { logout } from "../redux/userSlice";
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 // Create an axios instance with common configuration
 const apiClient = axios.create({
