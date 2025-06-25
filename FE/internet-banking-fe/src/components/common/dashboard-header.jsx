@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { Bell, ChevronDown, Search } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { Bell, ChevronDown, Search } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Sheet,
   SheetContent,
@@ -17,29 +17,29 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Link, useNavigate } from "react-router-dom";
-import { User } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../redux/userSlice";
+} from '@/components/ui/sheet';
+import { Link, useNavigate } from 'react-router-dom';
+import { User } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../redux/userSlice';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
   changePassword,
   resetChangePasswordState,
-} from "@/redux/changePasswordSlice";
+} from '@/redux/changePasswordSlice';
 import {
   fetchNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-} from "@/redux/notificationsSlice";
-import { format } from "date-fns";
+} from '@/redux/notificationsSlice';
+import { format } from 'date-fns';
 
 export default function DashboardHeader() {
   const dispatch = useDispatch();
@@ -50,7 +50,7 @@ export default function DashboardHeader() {
     error: changeError,
     success: changeSuccess,
   } = useSelector((state) => state.changePassword);
-  
+
   const { items: notifications, loading: notificationsLoading } = useSelector(
     (state) => state.notifications
   );
@@ -65,9 +65,9 @@ export default function DashboardHeader() {
   const handleNotificationClick = async (notification) => {
     // Update state and call API in background
     dispatch(markNotificationAsRead(notification.notificationId));
-    
+
     // Navigate to debt reminders tab within customer dashboard
-    navigate("/customer/dashboard/debt-reminders");
+    navigate('/customer/dashboard/debt-reminders');
   };
 
   const handleMarkAllAsRead = async () => {
@@ -75,8 +75,8 @@ export default function DashboardHeader() {
   };
 
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const handleChangePassword = async () => {
     dispatch(changePassword({ oldPassword, newPassword }));
@@ -85,24 +85,25 @@ export default function DashboardHeader() {
   const handleDialogClose = (open) => {
     setShowChangePassword(open);
     if (!open) {
-      setOldPassword("");
-      setNewPassword("");
+      setOldPassword('');
+      setNewPassword('');
       dispatch(resetChangePasswordState());
     }
   };
 
   const formatNotificationTime = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
+
     if (diffInMinutes < 60) {
       return `${diffInMinutes} minutes ago`;
     } else if (diffInMinutes < 1440) {
       const hours = Math.floor(diffInMinutes / 60);
       return `${hours} hours ago`;
     } else {
-      return format(date, "MMM d, yyyy");
+      return format(date, 'MMM d, yyyy');
     }
   };
 
@@ -142,30 +143,36 @@ export default function DashboardHeader() {
                     <div className="text-center text-muted-foreground">
                       Loading notifications...
                     </div>
-                  ) : notifications.length === 0 ? (
+                  ) : notifications?.length === 0 ? (
                     <div className="text-center text-muted-foreground">
                       No notifications
                     </div>
                   ) : (
-                    notifications.map((notification) => (
+                    notifications?.map((notification) => (
                       <div
                         key={notification.notificationId}
                         className={`p-4 rounded-lg cursor-pointer transition-colors ${
-                          notification.read ? "bg-white hover:bg-gray-50" : "bg-blue-50 hover:bg-blue-100"
+                          notification?.read
+                            ? 'bg-white hover:bg-gray-50'
+                            : 'bg-blue-50 hover:bg-blue-100'
                         }`}
                         onClick={() => handleNotificationClick(notification)}
                       >
-                        <div className="font-semibold text-[15px]">{notification.title}</div>
+                        <div className="font-semibold text-[15px]">
+                          {notification?.title}
+                        </div>
                         <div className="mt-1 text-[14px] text-muted-foreground">
-                          {notification.content.split('\n').map((line, idx) => (
-                            <span key={idx}>
-                              {line}
-                              <br />
-                            </span>
-                          ))}
+                          {notification?.content
+                            ?.split('\n')
+                            .map((line, idx) => (
+                              <span key={idx}>
+                                {line}
+                                <br />
+                              </span>
+                            ))}
                         </div>
                         <div className="mt-2 text-[13px] text-muted-foreground">
-                          {formatNotificationTime(notification.createdAt)}
+                          {formatNotificationTime(notification?.createdAt)}
                         </div>
                       </div>
                     ))
@@ -183,7 +190,7 @@ export default function DashboardHeader() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block text-sm font-normal">
-                  {fullName || "User"}
+                  {fullName || 'User'}
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -259,7 +266,7 @@ export default function DashboardHeader() {
               onClick={handleChangePassword}
               disabled={changeLoading}
             >
-              {changeLoading ? "Changing..." : "Confirm"}
+              {changeLoading ? 'Changing...' : 'Confirm'}
             </Button>
           </DialogFooter>
         </DialogContent>

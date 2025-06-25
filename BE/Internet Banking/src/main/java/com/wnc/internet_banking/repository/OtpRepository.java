@@ -21,4 +21,6 @@ public interface OtpRepository extends JpaRepository<Otp, UUID> {
                               @Param("now") LocalDateTime now);
 
     Optional<Otp> findByUserAndOtpCodeAndPurposeAndIsUsedFalse(User user, String otpCode, Otp.Purpose purpose);
+
+    void deleteAllByUser_UserId(UUID userId);
 }

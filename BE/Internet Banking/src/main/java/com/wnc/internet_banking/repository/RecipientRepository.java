@@ -22,5 +22,7 @@ public interface RecipientRepository extends JpaRepository<Recipient, UUID> {
     List<Recipient> findAllByOwner_UserIdAndBankIsNull(UUID ownerUserId);
 
     List<Recipient> findAllByOwner_UserIdAndBankIsNullAndNicknameContainingIgnoreCase(UUID ownerUserId, String nickname);
+
+    void deleteAllByOwner_UserId(UUID ownerUserId);
 }
 

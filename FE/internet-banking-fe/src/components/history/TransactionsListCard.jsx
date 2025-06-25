@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import {
   Card,
   CardHeader,
@@ -10,14 +8,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { ArrowDownLeft, ArrowUpRight, CalendarIcon } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPage } from '@/redux/transactionsSlice';
 import {
@@ -33,8 +24,6 @@ const TransactionListCard = () => {
   };
 
   const [filterType, setFilterType] = useState('received');
-  const [dateFrom, setDateFrom] = useState(undefined);
-  const [dateTo, setDateTo] = useState(undefined);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -112,58 +101,6 @@ const TransactionListCard = () => {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal cursor-pointer',
-                      !dateFrom && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateFrom ? format(dateFrom, 'PPP') : 'From Date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={dateFrom}
-                    onSelect={setDateFrom}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal cursor-pointer',
-                      !dateTo && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateTo ? format(dateTo, 'PPP') : 'To Date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={dateTo}
-                    onSelect={setDateTo}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
         </div>
         <div className="border border-gray-200 rounded-md overflow-hidden">
           <div className="overflow-x-auto">
