@@ -3,11 +3,11 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import apiClient from "../services/apiClient";
 
 // Send internal transfer request
-export const initiateInternalTransfer = createAsyncThunk(
-  'transfer/initiateInternalTransfer',
+export const initiateTransfer = createAsyncThunk(
+  'transfer/initiateTransfer',
   async (payload, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/transactions/internal-transfers', payload);
+      const response = await apiClient.post('/transactions/transfers', payload);
       return response.data; // UUID from backend
     } catch (err) {
       console.log(err.message);
@@ -21,7 +21,7 @@ export const confirmInternalTransfer = createAsyncThunk(
   async ({ transactionId, otp }, { rejectWithValue }) => {
     try {
       const response = await apiClient.post(
-        `/transactions/internal-transfers/${transactionId}/confirm`,
+        `/transactions/transfers/${transactionId}/confirm`,
         { otpCode: otp }
       );
       return response.message;
@@ -42,15 +42,15 @@ const transferSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(initiateInternalTransfer.pending, (state) => {
+      .addCase(initiateTransfer.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(initiateInternalTransfer.fulfilled, (state, action) => {
+      .addCase(initiateTransfer.fulfilled, (state, action) => {
         state.loading = false;
         state.transactionId = action.payload;
       })
-      .addCase(initiateInternalTransfer.rejected, (state, action) => {
+      .addCase(initiateTransfer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })

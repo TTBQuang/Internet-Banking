@@ -3,7 +3,7 @@ package com.wnc.internet_banking.controller;
 import com.wnc.internet_banking.dto.request.transaction.ConfirmDebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionRequest;
 import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
-import com.wnc.internet_banking.dto.request.transaction.InternalTransferRequest;
+import com.wnc.internet_banking.dto.request.transaction.TransferRequest;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.transaction.TransactionDto;
 import com.wnc.internet_banking.entity.Transaction;
@@ -79,27 +79,27 @@ public class TransactionController {
         return ResponseEntity.ok(BaseResponse.data(transactions));
     }
 
-    @PostMapping("/internal-transfers")
+    @PostMapping("/transfers")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<BaseResponse<UUID>> initiateInternalTransfer(
-            @RequestBody InternalTransferRequest internalTransferRequest
+    public ResponseEntity<BaseResponse<UUID>> initiateTransfer(
+            @RequestBody TransferRequest transferRequest
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
 
-        UUID transactionId = transactionService.initiateInternalTransfer(internalTransferRequest, userId);
+        UUID transactionId = transactionService.initiateTransfer(transferRequest, userId);
 
         return ResponseEntity.ok(BaseResponse.data(transactionId));
     }
 
-    @PostMapping("/internal-transfers/{transactionId}/confirm")
+    @PostMapping("/transfers/{transactionId}/confirm")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<BaseResponse<?>> confirmInternalTransfer(
+    public ResponseEntity<BaseResponse<?>> confirmTransfer(
             @PathVariable UUID transactionId,
             @RequestBody ConfirmTransactionRequest confirmTransactionRequest
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
 
-        transactionService.confirmInternalTransfer(transactionId, confirmTransactionRequest, userId);
+        transactionService.confirmTransfer(transactionId, confirmTransactionRequest, userId);
 
         return ResponseEntity.ok(BaseResponse.message("Transaction confirmed successfully"));
     }

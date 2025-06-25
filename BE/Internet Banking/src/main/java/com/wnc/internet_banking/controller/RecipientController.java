@@ -183,7 +183,7 @@ public class RecipientController {
     })
     @GetMapping("/all/internal")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'EMPLOYEE')")
-    public ResponseEntity<BaseResponse<List<RecipientDto>>> getAllIntrnealRecipients(
+    public ResponseEntity<BaseResponse<List<RecipientDto>>> getAllInternalRecipients(
             @RequestParam(required = false) @Parameter(description = "Tên gợi nhớ để tìm kiếm") String nickname
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();

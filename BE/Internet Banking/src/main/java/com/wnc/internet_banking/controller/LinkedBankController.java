@@ -6,6 +6,7 @@ import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferReques
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
+import com.wnc.internet_banking.dto.response.linkedbank.LinkedBankDto;
 import com.wnc.internet_banking.service.LinkedBankService;
 import com.wnc.internet_banking.util.RSAUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,6 +29,22 @@ public class LinkedBankController {
 
     @Value("${rsa.private-key}")
     private String privateKey;
+
+    @GetMapping
+    public ResponseEntity<BaseResponse<?>> getAllLinkedBanks() {
+        List<LinkedBankDto> allLinkedBanks = linkedBankService.getAllLinkedBanks();
+
+        return ResponseEntity.ok(BaseResponse.data(allLinkedBanks));
+    }
+
+    @GetMapping("/account-info")
+    public ResponseEntity<BaseResponse<?>> getAccountInfo(
+            @RequestParam(name = "bankCode", required = true) String bankCode,
+            @RequestParam(name = "accountNumber", required = true) String accountNumber
+    ) throws Exception {
+        AccountResponseDto accountInfo = linkedBankService.getAccountInfo(bankCode, accountNumber);
+        return ResponseEntity.ok(BaseResponse.data(accountInfo));
+    }
 
     @PostMapping("/account-info")
     public ResponseEntity<BaseResponse<?>> getAccountInfo(
