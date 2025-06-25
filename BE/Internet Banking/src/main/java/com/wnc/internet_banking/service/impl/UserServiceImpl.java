@@ -104,6 +104,8 @@ public class UserServiceImpl implements UserService {
 
         debtReminderRepository.deleteAllByCreditor_UserId(userId);
 
+        debtReminderRepository.deleteAllByDebtorAccount_User_UserId(userId);
+
         accountRepository.deleteAllByUser_UserId(userId);
 
         userRepository.deleteById(userId);
