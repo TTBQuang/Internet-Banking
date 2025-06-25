@@ -6,6 +6,7 @@ import com.wnc.internet_banking.entity.User;
 import com.wnc.internet_banking.repository.NotificationRepository;
 import com.wnc.internet_banking.repository.UserRepository;
 import com.wnc.internet_banking.service.NotificationService;
+import com.wnc.internet_banking.controller.NotificationWebSocketController;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final NotificationWebSocketController notificationWebSocketController;
 
     @Override
     public List<NotificationDto> getAllNotificationsByUserId(UUID userId) {
@@ -70,5 +72,9 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setContent(content);
 
         notificationRepository.save(notification);
+
+        // Gửi realtime notification qua websocket
+        NotificationDto dto = modelMapper.map(notification, NotificationDto.class);
+        notificationWebSocketController.sendNotificationToUser(userId.toString(), dto);
     }
 }

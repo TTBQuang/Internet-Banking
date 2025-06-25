@@ -43,7 +43,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponseDto getAccountByAccountNumber(String accountNumber) {
         Account account= accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Account not found with account number: " + accountNumber));
+                .orElseThrow(() -> new IllegalArgumentException("Account not found with account number: " + accountNumber));
 
         AccountResponseDto accountDto = new AccountResponseDto();
         accountDto.setAccountNumber(account.getAccountNumber());

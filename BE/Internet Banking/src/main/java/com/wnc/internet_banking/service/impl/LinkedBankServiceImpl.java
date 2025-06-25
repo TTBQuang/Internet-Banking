@@ -1,8 +1,10 @@
 package com.wnc.internet_banking.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wnc.internet_banking.dto.request.transaction.LinkedBankTransferRequestDto;
-import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
+import com.wnc.internet_banking.dto.response.linkedbank.LinkedBankDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.LinkedBank;
 import com.wnc.internet_banking.entity.Transaction;
@@ -13,12 +15,20 @@ import com.wnc.internet_banking.service.LinkedBankService;
 import com.wnc.internet_banking.util.HmacUtils;
 import com.wnc.internet_banking.util.RSAUtils;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service("linkedBankService")
 public class LinkedBankServiceImpl implements LinkedBankService {
@@ -26,9 +36,13 @@ public class LinkedBankServiceImpl implements LinkedBankService {
     private final ModelMapper modelMapper;
     private final LinkedBankRepository linkedBankRepository;
     private final TransactionRepository transactionRepository;
+    private final String ourBankCode = "SCB";
 
     @Value("${hash.secret-key}")
     private String hashSecretKey;
+
+    @Value("${rsa.private-key}")
+    private String privateKey;
 
     public LinkedBankServiceImpl(AccountRepository accountRepository,
                                  ModelMapper modelMapper,
@@ -40,6 +54,15 @@ public class LinkedBankServiceImpl implements LinkedBankService {
         this.linkedBankRepository = linkedBankRepository;
         this.transactionRepository = transactionRepository;
         this.hashSecretKey = hashSecretKey;
+    }
+
+    @Override
+    public List<LinkedBankDto> getAllLinkedBanks() {
+        List<LinkedBank> list = linkedBankRepository.findAll();
+
+        return list.stream()
+                .map((linkedBank) -> modelMapper.map(linkedBank, LinkedBankDto.class))
+                .toList();
     }
 
     @Override
@@ -111,5 +134,101 @@ public class LinkedBankServiceImpl implements LinkedBankService {
                 .orElseThrow(() -> new EntityNotFoundException("Unknown bank with bank code: " + bankCode));
 
         return RSAUtils.verify(data, signature, bank.getPublicKey());
+    }
+
+    @Override
+    public AccountResponseDto getAccountInfo(String bankCode, String accountNumber) throws Exception {
+        LinkedBank bank = linkedBankRepository.findByBankCode(bankCode)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown bank with bank code: " + bankCode));
+
+        // Convert to JSON
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> bodyMap = new LinkedHashMap<>();
+        bodyMap.put("accountNumber", accountNumber);
+        bodyMap.put("bankCode", ourBankCode);
+        String body = mapper.writeValueAsString(bodyMap);
+
+        String now = String.valueOf(Instant.now().toEpochMilli());
+        String hmacInput = body + now + ourBankCode + bank.getSecretKeyHash();
+        String hmac = HmacUtils.hmacSha256(hmacInput, hashSecretKey);
+
+        // Send request
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("X-Timestamp", now);
+        headers.add("Bank-Code", ourBankCode);
+        headers.add("X-Request-Hash", hmac);
+
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    bank.getGetAccountInfoUrl(), entity, String.class);
+
+            JsonNode root = mapper.readTree(response.getBody());
+            JsonNode dataNode = root.path("data");
+            String fullName = dataNode.path("fullName").asText();
+
+            AccountResponseDto accountDto = new AccountResponseDto();
+            accountDto.setAccountNumber(accountNumber);
+            accountDto.setFullName(fullName);
+            return accountDto;
+        } catch (HttpStatusCodeException ex) {
+            String errorBody = ex.getResponseBodyAsString();
+            JsonNode root = mapper.readTree(errorBody);
+            if (root.path("message").asText().contains("not found")) {
+                throw new IllegalArgumentException("Account not found with account number: " + accountNumber);
+            } else {
+                throw new IllegalArgumentException(root.path("message").asText());
+            }
+        }
+    }
+
+    @Override
+    public void sendTransferRequest(Transaction transaction)
+            throws Exception {
+        String receiverBankCode = transaction.getReceiverBank().getBankCode();
+        LinkedBank bank = linkedBankRepository.findByBankCode(receiverBankCode)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown bank with bank code: " + receiverBankCode));
+
+        // Convert to JSON
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> bodyMap = new LinkedHashMap<>();
+        bodyMap.put("senderAccountNumber", transaction.getSenderAccountNumber());
+        bodyMap.put("receiverAccountNumber", transaction.getReceiverAccountNumber());
+        bodyMap.put("amount", transaction.getAmount());
+        bodyMap.put("content", transaction.getContent());
+        String body = mapper.writeValueAsString(bodyMap);
+
+        String now = String.valueOf(Instant.now().toEpochMilli());
+        String hmacInput = body + now + ourBankCode + bank.getSecretKeyHash();
+        String hmac = HmacUtils.hmacSha256(hmacInput, hashSecretKey);
+
+        String signature = RSAUtils.sign(body, privateKey);
+
+        // Send request
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("X-Timestamp", now);
+        headers.add("Bank-Code", ourBankCode);
+        headers.add("X-Request-Hash", hmac);
+        headers.add("X-Signature", signature);
+
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    bank.getMoneyTransferUrl(), entity, String.class);
+        } catch (HttpStatusCodeException ex) {
+            String errorBody = ex.getResponseBodyAsString();
+            JsonNode root = mapper.readTree(errorBody);
+            if (root.path("message").asText().contains("not found")) {
+                throw new IllegalArgumentException("Account not found with account number: " + transaction.getReceiverAccountNumber());
+            } else {
+                throw new IllegalArgumentException(root.path("message").asText());
+            }
+        }
     }
 }

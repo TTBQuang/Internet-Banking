@@ -70,5 +70,7 @@ public interface DebtReminderRepository extends JpaRepository<DebtReminder, UUID
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
+    void deleteAllByCreditor_UserId(UUID userId);
 }
 

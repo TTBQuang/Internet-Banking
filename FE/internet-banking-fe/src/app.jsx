@@ -17,9 +17,12 @@ import Recipients from "./pages/customer/recipients";
 import ForgotPasswordPage from "./pages/forgot-password";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import useNotificationSocket from "./hooks/useNotificationSocket";
 
 function App() {
   const user = useSelector((state) => state.user);
+
+  useNotificationSocket();
 
   // Protected Route component
   const ProtectedRoute = ({ children, allowedRoles }) => {
