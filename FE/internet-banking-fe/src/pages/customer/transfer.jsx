@@ -21,7 +21,10 @@ import {
 import { Textarea } from '../../components/ui/textarea';
 import { ArrowRight, Loader2, Search, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllRecipients } from '../../redux/recipientsSlice';
+import { 
+  fetchAllRecipients,
+  addRecipient
+} from '../../redux/recipientsSlice';
 import {
   initiateTransfer,
   confirmInternalTransfer,
@@ -65,6 +68,11 @@ export default function TransferPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [selectedBankCode, setSelectedBankCode] = useState("");
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [nickname, setNickname] = useState('');
+  const [isRecipientSaved, setIsRecipientSaved] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [isSavingRecipient, setIsSavingRecipient] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllRecipients(searchTerm));
@@ -149,7 +157,7 @@ export default function TransferPage() {
             setError(err);
           });
       } else {
-        await dispatch(fetchAccountInfo({selectedBankCode, accountNumber}))
+        await dispatch(fetchAccountInfo({ selectedBankCode, accountNumber }))
           .unwrap()
           .then((account) => {
             setReceiverInfo(account);
@@ -224,6 +232,7 @@ export default function TransferPage() {
   const resetForm = () => {
     setSearchTerm('');
     setError('');
+    setToastMessage('');
     setStep(1);
     setTransferType('recipient');
     setReceiverInfo(null);
@@ -234,6 +243,9 @@ export default function TransferPage() {
     setIsConfirming(false);
     setAccountNumber('');
     setSelectedBankCode('');
+    setShowSaveModal(false);
+    setIsRecipientSaved(false);
+    setIsSavingRecipient(false);
   };
 
   // Handle confirm transfer
@@ -243,7 +255,7 @@ export default function TransferPage() {
       setIsConfirming(true);
 
       let payload = {
-        receiverAccountNumber: receiverInfo.accountNumber, 
+        receiverAccountNumber: receiverInfo.accountNumber,
         amount: parseFloat(amount),
         content: description,
       };
@@ -276,6 +288,26 @@ export default function TransferPage() {
     }
   };
 
+  // Handle save recipient
+  const handleSaveRecipient = async () => {
+    try {      
+      const bankId = bankOptions.find(bank => bank.bankCode === selectedBankCode)?.linkedBankId || null;
+      await dispatch(addRecipient({
+        accountNumber: receiverInfo.accountNumber,
+        fullName: receiverInfo.fullName || receiverInfo.nickname,
+        bankId: bankId,
+        nickname: nickname.trim()
+      })).unwrap();
+      
+      setToastMessage('Recipient saved successfully!');
+    } catch (err) {
+      setToastMessage(err?.message || 'An error occurred');
+    } finally {
+      setShowSaveModal(false);
+      setIsSavingRecipient(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -293,8 +325,8 @@ export default function TransferPage() {
                   {step === 1
                     ? 'Enter recipient details and amount'
                     : step === 2
-                    ? 'Confirm transfer details'
-                    : 'Verify with OTP'}
+                      ? 'Confirm transfer details'
+                      : 'Verify with OTP'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -331,12 +363,11 @@ export default function TransferPage() {
                               recipients.map((recipient) => (
                                 <div
                                   key={recipient.recipientId}
-                                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                                    receiverInfo?.recipientId ===
-                                    recipient.recipientId
+                                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${receiverInfo?.recipientId ===
+                                      recipient.recipientId
                                       ? 'border-blue-500 bg-blue-50'
                                       : 'hover:bg-gray-50'
-                                  }`}
+                                    }`}
                                   onClick={() =>
                                     handleSelectRecipient(recipient)
                                   }
@@ -352,15 +383,15 @@ export default function TransferPage() {
                                         </p>
                                         <p className="font-medium">
                                           {recipient.nickname} - <span className="text-sm text-muted-foreground">
-                                          {recipient.accountNumber}
-                                        </span>
+                                            {recipient.accountNumber}
+                                          </span>
                                         </p>
                                       </div>
                                     </div>
                                     {receiverInfo?.recipientId ===
                                       recipient.recipientId && (
-                                      <CheckCircle2 className="h-5 w-5 text-blue-600" />
-                                    )}
+                                        <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                                      )}
                                   </div>
                                 </div>
                               ))
@@ -603,7 +634,7 @@ export default function TransferPage() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 ) : step === 2 ? (
-                  <Button 
+                  <Button
                     onClick={handleConfirmTransfer}
                     disabled={isConfirming}>
                     Confirm Transfer
@@ -643,14 +674,63 @@ export default function TransferPage() {
                   Make Another Transfer
                 </Button>
                 <Button variant="outline" className="w-full"
-                onClick={() => navigate('/customer/dashboard/history')}>
+                  onClick={() => navigate('/customer/dashboard/history')}>
                   View Receipt
                 </Button>
+                {transferType === 'account' && (
+                <Button variant="outline" className="w-full" 
+                disabled={isRecipientSaved}
+                onClick={() => {
+                  setNickname(receiverInfo.nickname || receiverInfo.fullName);
+                  setIsRecipientSaved(true);
+                  setShowSaveModal(true);
+                }}>
+                  Save as Recipient
+                </Button>
+                )}
+                {isRecipientSaved && (
+                  <p className={`mt-4 text-sm text-center rounded-md p-2 ${
+                    toastMessage.toLowerCase().includes('successfully')
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {toastMessage}
+                  </p>
+                )}
               </div>
             </div>
           )}
         </Card>
       </div>
+
+      {showSaveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
+            <h2 className="text-lg font-semibold">Save as Recipient</h2>
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Nickname</Label>
+              <Input
+                id="nickname"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowSaveModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                disabled={isSavingRecipient}
+                onClick={() => {
+                  setIsSavingRecipient(true);
+                  handleSaveRecipient();
+                }}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

@@ -61,7 +61,7 @@ public class RecipientController {
 
     @GetMapping("/all/internal")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'EMPLOYEE')")
-    public ResponseEntity<BaseResponse<List<RecipientDto>>> getAllIntrnealRecipients(
+    public ResponseEntity<BaseResponse<List<RecipientDto>>> getAllInternalRecipients(
             @RequestParam (required = false) String nickname
     ) {
         UUID userId = SecurityUtil.getCurrentUserId();
