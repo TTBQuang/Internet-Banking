@@ -27,7 +27,7 @@ public class CustomerController {
 
 
     @GetMapping
-    public ResponseEntity<BaseResponse<Page<User>>> getAllCustomers(
+    public ResponseEntity<BaseResponse<Page<UserDto>>> getAllCustomers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(BaseResponse.data(userService.getAllCustomers(page, size)));
@@ -50,14 +50,16 @@ public class CustomerController {
     @PostMapping("/register")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<BaseResponse<User>> registerCustomer(@RequestBody CustomerRegistrationDto dto) {
-        User customer = userService.createCustomer(dto);
-        return ResponseEntity.ok(BaseResponse.data(customer));
+//        User customer = userService.createCustomer(dto);
+//        return ResponseEntity.ok(BaseResponse.data(customer));
+        return ResponseEntity.ok(userService.createCustomer(dto));
     }
 
     @PostMapping("/deposit")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<BaseResponse<Account>> deposit(@RequestBody DepositRequestDto dto) {
-        Account updatedAccount = accountService.deposit(dto.getAccountNumber(), dto.getAmount());
-        return ResponseEntity.ok(BaseResponse.data(updatedAccount));
+//        Account updatedAccount = accountService.deposit(dto.getAccountNumber(), dto.getAmount());
+//        return ResponseEntity.ok(BaseResponse.data(updatedAccount));
+        return ResponseEntity.ok(accountService.deposit(dto.getAccountNumber(), dto.getAmount()));
     }
 }
