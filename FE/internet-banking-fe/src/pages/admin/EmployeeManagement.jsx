@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import apiClient from "../../services/apiClient";
 import { Button } from "../../components/ui/button";
 import Pagination from "../../components/common/pagination";
@@ -14,8 +13,6 @@ export default function EmployeeManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
-  const dispatch = useDispatch();
 
   const fetchEmployees = async (pageNum = 1) => {
     setIsLoading(true);
@@ -45,7 +42,14 @@ export default function EmployeeManagement() {
       let res;
       if (editing) {
         res = await apiClient.put(`/api/employees/${editing.userId}`, form);
-        toast.success("Cập nhật nhân viên thành công");
+        if (res.message == "failed") {
+          toast.error("Cập nhật nhân viên thất bại");
+        } else {
+          toast.success("Cập nhật nhân viên thành công");
+          setForm({ username: "", password: "", fullName: "", email: "", phone: "" });
+          setEditing(null);
+          fetchEmployees(page);
+        }
       } else {
         res = await apiClient.post("/api/employees/register", form);
         if (res.message) {
@@ -59,16 +63,20 @@ export default function EmployeeManagement() {
       }
     } catch (error) {
       console.error('Lỗi khi submit form:', error);
-      const errorMessage = error.response?.message || "Đã xảy ra lỗi khi xử lý yêu cầu";
+      const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xử lý yêu cầu";
       toast.error(errorMessage);
     }
   };
 
   const handleDelete = async (userId) => {
     try {
-      await apiClient.delete(`/api/employees/${userId}`);
-      toast.success("Xóa nhân viên thành công");
-      fetchEmployees(page);
+      const res = await apiClient.delete(`/api/employees/${userId}`);
+        if (res.message == "failed") {
+        toast.error("Xóa nhân viên thất bại");
+      } else {
+        toast.success("Xóa nhân viên thành công");
+        fetchEmployees(page);
+      }
     } catch (error) {
       console.error('Lỗi khi xóa employee:', error);
       toast.error("Đã xảy ra lỗi khi xóa nhân viên");
@@ -77,34 +85,34 @@ export default function EmployeeManagement() {
 
   const handleEdit = (employee) => {
     setEditing(employee);
-    setForm(employee);
+    setForm({ ...employee, password: "" }); // Reset password khi chỉnh sửa
   };
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-8">
-      {/* Toast Container */}
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
 
-      {/* Form Section */}
       <div className="bg-white shadow-md rounded-xl p-6">
         <h2 className="text-2xl font-semibold mb-4">
           {editing ? "Edit Employee" : "Add New Employee"}
         </h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
-            className="border rounded px-4 py-2"
+            className="border rounded px-4 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
             value={form.username}
             onChange={(e) => setForm({ ...form, username: e.target.value })}
             placeholder="Username"
             required
+            disabled={editing}
           />
           <input
-            className="border rounded px-4 py-2"
+            className="border rounded px-4 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             placeholder="Password"
             type="password"
             required={!editing}
+            disabled={editing}
           />
           <input
             className="border rounded px-4 py-2"
@@ -130,7 +138,7 @@ export default function EmployeeManagement() {
           />
           <div className="flex gap-2 mt-2 col-span-full">
             <Button type="submit" className="px-6">
-              {editing ? "Cập nhật" : "Tạo"}
+              {editing ? "Update" : "Add"}
             </Button>
             {editing && (
               <Button
@@ -141,18 +149,17 @@ export default function EmployeeManagement() {
                   setForm({ username: "", password: "", fullName: "", email: "", phone: "" });
                 }}
               >
-                Hủy
+                Cancel
               </Button>
             )}
           </div>
         </form>
       </div>
 
-      {/* Employee List Section */}
       <div className="bg-white shadow-md rounded-xl p-6">
         <h2 className="text-2xl font-semibold mb-4">Employees</h2>
         {isLoading ? (
-          <p>Đang tải...</p>
+          <p>Loading...</p>
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -174,8 +181,8 @@ export default function EmployeeManagement() {
                       <td className="px-4 py-2">{e.email}</td>
                       <td className="px-4 py-2">{e.phone}</td>
                       <td className="px-4 py-2 text-center space-x-2">
-                        <Button size="sm" onClick={() => handleEdit(e)}>Sửa</Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDelete(e.userId)}>Xóa</Button>
+                        <Button size="sm" onClick={() => handleEdit(e)}>Edit</Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleDelete(e.userId)}>Delete</Button>
                       </td>
                     </tr>
                   ))}

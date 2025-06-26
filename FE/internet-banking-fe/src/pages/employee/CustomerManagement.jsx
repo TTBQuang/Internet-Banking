@@ -150,7 +150,7 @@ export default function CustomerManagement() {
           />
           <div className="flex gap-2 mt-2 col-span-full">
             <Button type="submit" className="px-6">
-              {editing ? "Cập nhật" : "Tạo"}
+              {editing ? "Update" : "Add"}
             </Button>
             {editing && (
               <Button
@@ -161,7 +161,7 @@ export default function CustomerManagement() {
                   setForm({ username: "", password: "", fullName: "", email: "", phone: "" });
                 }}
               >
-                Hủy
+                Cancel
               </Button>
             )}
           </div>
@@ -172,7 +172,7 @@ export default function CustomerManagement() {
       <div className="bg-white shadow-md rounded-xl p-6">
         <h2 className="text-2xl font-semibold mb-4">Customers</h2>
         {isLoading ? (
-          <p>Đang tải...</p>
+          <p>Loading...</p>
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -196,7 +196,7 @@ export default function CustomerManagement() {
                       <td className="px-4 py-2 text-center space-x-2">
                         {/* <Button size="sm" onClick={() => handleEdit(c)}>Sửa</Button> */}
                         {/* <Button size="sm" variant="destructive" onClick={() => handleDelete(c.userId)}>Xóa</Button> */}
-                        <Button size="sm" variant="outline" onClick={() => handleViewHistory(c.userId)}>Xem Lịch Sử</Button>
+                        <Button size="sm" variant="outline" onClick={() => handleViewHistory(c.userId)}>View Transactions</Button>
                       </td>
                     </tr>
                   ))}
