@@ -1,6 +1,7 @@
 package com.wnc.internet_banking.controller;
 
 import com.wnc.internet_banking.dto.request.user.EmployeeRegistrationDto;
+import com.wnc.internet_banking.dto.response.user.UserDto;
 import com.wnc.internet_banking.entity.User;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.service.UserService;
@@ -21,18 +22,19 @@ public class EmployeeController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<BaseResponse<Page<User>>> getAllEmployees(
+    public ResponseEntity<BaseResponse<Page<UserDto>>> getAllEmployees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<User> employees = userService.getAllEmployees(page, size);
+        Page<UserDto> employees = userService.getAllEmployees(page, size);
         return ResponseEntity.ok(BaseResponse.data(employees));
     }
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<User>> registerEmployee(@RequestBody EmployeeRegistrationDto dto) {
-        User employee = userService.createEmployee(dto);
-        return ResponseEntity.ok(BaseResponse.data(employee));
+//        User employee = userService.createEmployee(dto);
+//        return ResponseEntity.ok(BaseResponse.data(employee));
+        return ResponseEntity.ok(userService.createEmployee(dto));
     }
 
     @PutMapping("/{userId}")
@@ -40,14 +42,12 @@ public class EmployeeController {
     public ResponseEntity<BaseResponse<User>> updateEmployee(
             @PathVariable UUID userId,
             @RequestBody EmployeeRegistrationDto dto) {
-        User employee = userService.updateEmployee(userId, dto);
-        return ResponseEntity.ok(BaseResponse.data(employee));
+        return ResponseEntity.ok(userService.updateEmployee(userId, dto));
     }
 
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable UUID userId) {
-        userService.deleteEmployee(userId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<BaseResponse<Boolean>> deleteEmployee(@PathVariable UUID userId) {
+        return ResponseEntity.ok(userService.deleteEmployee(userId));
     }
 }

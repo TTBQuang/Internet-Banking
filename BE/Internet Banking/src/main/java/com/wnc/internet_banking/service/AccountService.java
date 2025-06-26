@@ -1,5 +1,6 @@
 package com.wnc.internet_banking.service;
 
+import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.entity.Account;
@@ -16,5 +17,5 @@ public interface AccountService {
 
     Account createAccountForUser(User user);
 
-    Account deposit(String accountNumber, double amount);
+    BaseResponse<Account> deposit(String accountNumber, double amount);
 }
