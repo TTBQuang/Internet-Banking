@@ -13,7 +13,7 @@ const EmployeeDashBoard = () => {
         <TabsList>
           <TabsTrigger value="customers">Customer Management</TabsTrigger>
           <TabsTrigger value="deposit">Deposit Money</TabsTrigger>
-          <TabsTrigger value="history">Transaction History</TabsTrigger>
+          {/* <TabsTrigger value="history">Transaction History</TabsTrigger> */}
         </TabsList>
         <TabsContent value="customers">
           <CustomerManagement />
