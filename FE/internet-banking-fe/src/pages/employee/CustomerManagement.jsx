@@ -4,6 +4,8 @@ import apiClient from "../../services/apiClient";
 import { Button } from "../../components/ui/button";
 import Pagination from "../../components/common/pagination";
 import { fetchAccountNumber, fetchTransactionHistory, resetTransactionHistory } from "../../redux/transactionHistorySlice";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function CustomerManagement() {
   const [customers, setCustomers] = useState([]);
@@ -43,25 +45,36 @@ export default function CustomerManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      let res;
       if (editing) {
-        await apiClient.put(`/api/customers/${editing.userId}`, form);
+        res = await apiClient.put(`/api/customers/${editing.userId}`, form);
+        toast.success("Cập nhật khách hàng thành công");
       } else {
-        await apiClient.post("/api/customers/register", form);
+        res = await apiClient.post("/api/customers/register", form);
+        if (res.message) {
+          toast.error(res.message);
+        } else {
+          toast.success("Tạo khách hàng thành công");
+          setForm({ username: "", password: "", fullName: "", email: "", phone: "" });
+          setEditing(null);
+          fetchCustomers(page);
+        }
       }
-      setForm({ username: "", password: "", fullName: "", email: "", phone: "" });
-      setEditing(null);
-      fetchCustomers(page);
     } catch (error) {
       console.error('Lỗi khi submit form:', error);
+      const errorMessage = error.response?.message || "Đã xảy ra lỗi khi xử lý yêu cầu";
+      toast.error(errorMessage);
     }
   };
 
   const handleDelete = async (userId) => {
     try {
       await apiClient.delete(`/api/customers/${userId}`);
+      toast.success("Xóa khách hàng thành công");
       fetchCustomers(page);
     } catch (error) {
       console.error('Lỗi khi xóa customer:', error);
+      toast.error("Đã xảy ra lỗi khi xóa khách hàng");
     }
   };
 
@@ -78,6 +91,7 @@ export default function CustomerManagement() {
       setShowHistoryModal(true);
     } catch (error) {
       console.error('Lỗi khi lấy lịch sử giao dịch:', error);
+      toast.error("Đã xảy ra lỗi khi lấy lịch sử giao dịch");
     }
   };
 
@@ -88,6 +102,9 @@ export default function CustomerManagement() {
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-8">
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+
       {/* Form Section */}
       <div className="bg-white shadow-md rounded-xl p-6">
         <h2 className="text-2xl font-semibold mb-4">
@@ -121,6 +138,7 @@ export default function CustomerManagement() {
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="Email"
+            type="email"
             required
           />
           <input
@@ -202,7 +220,7 @@ export default function CustomerManagement() {
       {showHistoryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
-            <h2 className="text-2xl font-semibold mb-4">Lịch Sử Giao Dịch</h2>
+            <h2 className="text-2xl font-semibold mb-4">Lịch Sử G Ascending Giao Dịch</h2>
             {historyLoading ? (
               <p>Đang tải lịch sử giao dịch...</p>
             ) : historyError ? (
