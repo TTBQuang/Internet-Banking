@@ -7,10 +7,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-@Schema(description = "Yêu cầu cập nhật tên gợi nhớ của người thụ hưởng")
+@Schema(description = "Yêu cầu cập nhật tên gợi nhớ của người nhận")
 public class RecipientUpdateRequest {
 
     @NotBlank(message = "Nickname is required")
-    @Schema(description = "Tên gợi nhớ mới cho người thụ hưởng")
+    @Schema(description = "Tên gợi nhớ mới cho người nhận")
     private String nickname;
 }

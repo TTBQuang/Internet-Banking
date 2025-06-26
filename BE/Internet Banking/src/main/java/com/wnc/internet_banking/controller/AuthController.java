@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/auth")
 @AllArgsConstructor
+@Tag(name = "Auth API", description = "Quản lý việc xác thực người dùng")
 public class AuthController {
     private final AuthService authService;
 
@@ -100,7 +102,7 @@ public class AuthController {
     @PostMapping("/refresh")
     @Operation(summary = "Làm mới token", description = "Cấp mới access token bằng refresh token")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Đổi mật khẩu thành công"),
+            @ApiResponse(responseCode = "200", description = "Refresh access token thành công"),
             @ApiResponse(
                     responseCode = "400",
                     description = "Tham số không hợp lệ",

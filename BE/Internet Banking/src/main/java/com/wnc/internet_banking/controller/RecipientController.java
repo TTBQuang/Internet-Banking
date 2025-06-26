@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,10 +27,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/recipients")
+@Tag(name = "Recipient API", description = "Quản lý người nhận")
 public class RecipientController {
     private final RecipientService recipientService;
 
-    @Operation(summary = "Thêm người thụ hưởng", description = "Thêm mới một người thụ hưởng cho người dùng hiện tại")
+    @Operation(summary = "Thêm người nhận", description = "Thêm mới một người nhận cho người dùng hiện tại")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Tạo thành công"),
             @ApiResponse(
@@ -65,7 +67,7 @@ public class RecipientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.data(savedRecipient));
     }
 
-    @Operation(summary = "Xóa người thụ hưởng", description = "Xóa một người thụ hưởng của người dùng hiện tại")
+    @Operation(summary = "Xóa người nhận", description = "Xóa một người nhận của người dùng hiện tại")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Xóa thành công"),
             @ApiResponse(
@@ -86,7 +88,7 @@ public class RecipientController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Không tìm thấy người thụ hưởng",
+                    description = "Không tìm thấy người nhận",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = BaseResponse.class)
@@ -96,12 +98,12 @@ public class RecipientController {
     @DeleteMapping("/{id}")
     @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name) and hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<Void>> deleteRecipient(
-            @PathVariable @Parameter(description = "ID của người thụ hưởng") UUID id) {
+            @PathVariable @Parameter(description = "ID của người nhận") UUID id) {
         recipientService.deleteRecipient(id);
         return ResponseEntity.ok(BaseResponse.message("Recipient deleted successfully"));
     }
 
-    @Operation(summary = "Lấy danh sách người thụ hưởng có phân trang", description = "Trả về danh sách người thụ hưởng theo trang")
+    @Operation(summary = "Lấy danh sách người nhận có phân trang", description = "Trả về danh sách người nhận theo trang")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lấy danh sách thành công"),
             @ApiResponse(
@@ -133,7 +135,7 @@ public class RecipientController {
         return ResponseEntity.ok(BaseResponse.data(recipients));
     }
 
-    @Operation(summary = "Lấy tất cả người thụ hưởng", description = "Trả về danh sách tất cả người thụ hưởng của người dùng hiện tại")
+    @Operation(summary = "Lấy tất cả người nhận", description = "Trả về danh sách tất cả người nhận của người dùng hiện tại")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lấy danh sách thành công"),
             @ApiResponse(
@@ -161,7 +163,7 @@ public class RecipientController {
         return ResponseEntity.ok(BaseResponse.data(recipients));
     }
 
-    @Operation(summary = "Lấy danh sách người thụ hưởng nội bộ", description = "Trả về danh sách người thụ hưởng cùng ngân hàng (nội bộ)")
+    @Operation(summary = "Lấy danh sách người nhận nội bộ", description = "Trả về danh sách người nhận cùng ngân hàng (nội bộ)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lấy danh sách thành công"),
             @ApiResponse(
@@ -195,7 +197,7 @@ public class RecipientController {
         return ResponseEntity.ok(BaseResponse.data(recipients));
     }
 
-    @Operation(summary = "Cập nhật tên gợi nhớ người thụ hưởng", description = "Chỉnh sửa nickname của người thụ hưởng")
+    @Operation(summary = "Cập nhật tên gợi nhớ người nhận", description = "Chỉnh sửa nickname của người nhận")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cập nhật thành công"),
             @ApiResponse(
@@ -216,7 +218,7 @@ public class RecipientController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Không tìm thấy người thụ hưởng",
+                    description = "Không tìm thấy người nhận",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = BaseResponse.class)
@@ -226,7 +228,7 @@ public class RecipientController {
     @PutMapping("/{id}")
     @PreAuthorize("@recipientService.isRecipientOwner(#id, authentication.name) and hasRole('CUSTOMER')")
     public ResponseEntity<BaseResponse<RecipientDto>> updateRecipientNickname(
-            @PathVariable @Parameter(description = "ID người thụ hưởng") UUID id,
+            @PathVariable @Parameter(description = "ID người nhận") UUID id,
             @Valid @RequestBody RecipientUpdateRequest request
     ) {
         RecipientDto updatedRecipient = recipientService.updateRecipientNickname(id, request);

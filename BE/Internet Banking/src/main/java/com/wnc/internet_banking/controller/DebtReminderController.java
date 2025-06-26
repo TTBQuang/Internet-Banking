@@ -6,6 +6,7 @@ import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.debtreminder.DebtReminderDto;
 import com.wnc.internet_banking.service.DebtReminderService;
 import com.wnc.internet_banking.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/debt-reminders")
+@Tag(name = "Debt Reminder API", description = "Quản lý nhắc nợ")
 public class DebtReminderController {
 
     private final DebtReminderService debtReminderService;
