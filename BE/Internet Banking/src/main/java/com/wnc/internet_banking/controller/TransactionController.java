@@ -9,6 +9,7 @@ import com.wnc.internet_banking.dto.response.transaction.TransactionDto;
 import com.wnc.internet_banking.entity.Transaction;
 import com.wnc.internet_banking.service.TransactionService;
 import com.wnc.internet_banking.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/transactions")
+@Tag(name = "Transaction API", description = "Quản lý giao dịch")
 public class TransactionController {
     private final TransactionService transactionService;
 

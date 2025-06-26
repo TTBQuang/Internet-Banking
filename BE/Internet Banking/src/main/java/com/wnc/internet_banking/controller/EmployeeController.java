@@ -4,6 +4,7 @@ import com.wnc.internet_banking.dto.request.user.EmployeeRegistrationDto;
 import com.wnc.internet_banking.entity.User;
 import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/employees")
+@Tag(name = "Employee API", description = "Quản lý nhân viên")
 public class EmployeeController {
 
     private final UserService userService;
