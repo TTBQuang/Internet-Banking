@@ -13,24 +13,24 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@Schema(description = "Thông tin người thụ hưởng")
+@Schema(description = "Thông tin người nhận")
 public class RecipientDto {
 
-    @Schema(description = "ID của người thụ hưởng")
+    @Schema(description = "ID của người nhận")
     private UUID recipientId;
 
-    @Schema(description = "Người sở hữu (người dùng đã lưu thụ hưởng này)")
+    @Schema(description = "Người sở hữu (người dùng đã lưu người nhận này)")
     private UserDto owner;
 
-    @Schema(description = "Số tài khoản của người thụ hưởng")
+    @Schema(description = "Số tài khoản của người nhận")
     private String accountNumber;
 
     @Schema(description = "Tên gợi nhớ (nickname) do người dùng đặt")
     private String nickname;
 
-    @Schema(description = "Ngân hàng liên kết với tài khoản thụ hưởng")
+    @Schema(description = "Ngân hàng liên kết với tài khoản nhận")
     private LinkedBankDto bank;
 
-    @Schema(description = "Thời điểm tạo người thụ hưởng")
+    @Schema(description = "Thời điểm tạo người nhận")
     private LocalDateTime createdAt;
 }
