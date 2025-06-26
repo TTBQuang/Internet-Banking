@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     // Tìm các giao dịch có liên quan đến accountNumber (gửi hoặc nhận)
     List<Transaction> findBySenderAccountNumberOrReceiverAccountNumber(String senderAccountNumber, String receiverAccountNumber);
 
-    Page<Transaction> findBySenderAccountNumberAndType(String senderAccountNumber, Transaction.Type type, Pageable pageable);
+    Page<Transaction> findBySenderAccountNumberAndTypeAndCreatedAtAfter(
+            String senderAccountNumber,
+            Transaction.Type type,
+            LocalDateTime createdAt,
+            Pageable pageable
+    );
 
-    Page<Transaction> findByReceiverAccountNumber(String receiverAccountNumber, Pageable pageable);
+    Page<Transaction> findByReceiverAccountNumberAndCreatedAtAfter(
+            String receiverAccountNumber,
+            LocalDateTime createdAt,
+            Pageable pageable
+    );
 }
