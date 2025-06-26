@@ -236,7 +236,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Transaction> transactions = transactionRepository.findBySenderAccountNumberAndType(account.getAccountNumber(), Transaction.Type.MONEY_TRANSFER, pageable);
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        Page<Transaction> transactions = transactionRepository
+                .findBySenderAccountNumberAndTypeAndCreatedAtAfter(
+                        account.getAccountNumber(),
+                        Transaction.Type.MONEY_TRANSFER,
+                        thirtyDaysAgo,
+                        pageable
+                );
 
         return transactions.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
     }
@@ -251,7 +258,13 @@ public class TransactionServiceImpl implements TransactionService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Transaction> transactions = transactionRepository.findByReceiverAccountNumber(account.getAccountNumber(), pageable);
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        Page<Transaction> transactions = transactionRepository
+                .findByReceiverAccountNumberAndCreatedAtAfter(
+                        account.getAccountNumber(),
+                        thirtyDaysAgo,
+                        pageable
+                );
 
         return transactions.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
     }
@@ -266,7 +279,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Transaction> transactions = transactionRepository.findBySenderAccountNumberAndType(account.getAccountNumber(), Transaction.Type.DEBT_PAYMENT, pageable);
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        Page<Transaction> transactions = transactionRepository
+                .findBySenderAccountNumberAndTypeAndCreatedAtAfter(
+                        account.getAccountNumber(),
+                        Transaction.Type.DEBT_PAYMENT,
+                        thirtyDaysAgo,
+                        pageable
+                );
 
         return transactions.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
     }
