@@ -164,74 +164,98 @@ const TransactionListCard = () => {
                     </td>
                   </tr>
                 ) : transactions.length > 0 ? (
-                  transactions.map((transaction) => (
-                    <tr
-                      key={transaction.transactionId}
-                      className="hover:bg-gray-50"
-                    >
-                      <td className="p-4">
-                        {new Date(transaction.createdAt).toLocaleDateString(
-                          'en-GB'
-                        )}
-                      </td>
-                      <td className="p-4 ">{transaction.content}</td>
-                      <td className="p-4 font-medium">
-                        {filterType === 'received'
-                          ? transaction.senderAccountNumber
-                          : transaction.receiverAccountNumber}
-                      </td>
-                      <td className="p-4">
-                        {filterType === 'received'
-                          ? (transaction.senderBank &&
-                              transaction.senderBank.bankName) ||
-                            'Internal'
-                          : (transaction.receiverBank &&
-                              transaction.receiverBank.bankName) ||
-                            'Internal'}
-                      </td>
-                      <td className="p-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          {filterType === 'received' ? (
-                            <ArrowDownLeft className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <ArrowUpRight className="h-4 w-4 text-red-600" />
+                  transactions.map((transaction) => {
+                    // Check if this is an external bank transaction
+                    const isExternalBank =
+                      filterType === 'received'
+                        ? transaction.senderBank &&
+                          transaction.senderBank.bankName &&
+                          transaction.senderBank.bankName !== 'Secure Bank'
+                        : transaction.receiverBank &&
+                          transaction.receiverBank.bankName &&
+                          transaction.receiverBank.bankName !== 'Secure Bank';
+
+                    return (
+                      <tr
+                        key={transaction.transactionId}
+                        className={`hover:bg-gray-50 ${
+                          isExternalBank
+                            ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                            : ''
+                        }`}
+                      >
+                        <td className="p-4">
+                          {new Date(transaction.createdAt).toLocaleDateString(
+                            'en-GB'
                           )}
+                        </td>
+                        <td className="p-4 ">{transaction.content}</td>
+                        <td className="p-4 font-medium">
+                          {filterType === 'received'
+                            ? transaction.senderAccountNumber
+                            : transaction.receiverAccountNumber}
+                        </td>
+                        <td className="p-4">
                           <span
-                            className={
-                              filterType === 'received'
-                                ? 'text-green-600'
-                                : 'text-red-600'
-                            }
+                            className={`${
+                              isExternalBank
+                                ? 'text-blue-700 font-semibold'
+                                : ''
+                            }`}
                           >
-                            {filterType === 'received' ? '+' : '-'}
-                            {formatCurrency(transaction.amount)}
+                            {filterType === 'received'
+                              ? (transaction.senderBank &&
+                                  transaction.senderBank.bankName) ||
+                                'Secure Bank'
+                              : (transaction.receiverBank &&
+                                  transaction.receiverBank.bankName) ||
+                                'Secure Bank'}
                           </span>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            transaction.status === 'PENDING'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : transaction.status === 'COMPLETED'
-                              ? 'bg-green-100 text-green-800'
-                              : transaction.status === 'FAILED'
-                              ? 'bg-red-100 text-red-800'
-                              : ''
-                          }`}
-                        >
-                          {transaction.status}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        {transaction.confirmedAt
-                          ? new Date(
-                              transaction.confirmedAt
-                            ).toLocaleDateString('en-GB')
-                          : 'N/A'}
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="p-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            {filterType === 'received' ? (
+                              <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <ArrowUpRight className="h-4 w-4 text-red-600" />
+                            )}
+                            <span
+                              className={
+                                filterType === 'received'
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
+                              }
+                            >
+                              {filterType === 'received' ? '+' : '-'}
+                              {formatCurrency(transaction.amount)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              transaction.status === 'PENDING'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : transaction.status === 'COMPLETED'
+                                ? 'bg-green-100 text-green-800'
+                                : transaction.status === 'FAILED'
+                                ? 'bg-red-100 text-red-800'
+                                : ''
+                            }`}
+                          >
+                            {transaction.status}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          {transaction.confirmedAt
+                            ? new Date(
+                                transaction.confirmedAt
+                              ).toLocaleDateString('en-GB')
+                            : 'N/A'}
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan={7} className="h-24 text-center text-gray-500">

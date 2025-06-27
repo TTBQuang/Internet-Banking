@@ -21,10 +21,7 @@ import {
 import { Textarea } from '../../components/ui/textarea';
 import { ArrowRight, Loader2, Search, User, CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchAllRecipients,
-  addRecipient
-} from '../../redux/recipientsSlice';
+import { fetchAllRecipients, addRecipient } from '../../redux/recipientsSlice';
 import {
   initiateTransfer,
   confirmInternalTransfer,
@@ -35,7 +32,7 @@ import {
 } from '../../redux/accountSlice';
 import {
   fetchAllLinkedBanks,
-  fetchAccountInfo
+  fetchAccountInfo,
 } from '../../redux/linkedBankSlice';
 import {
   clearState,
@@ -67,7 +64,7 @@ export default function TransferPage() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  const [selectedBankCode, setSelectedBankCode] = useState("");
+  const [selectedBankCode, setSelectedBankCode] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [nickname, setNickname] = useState('');
   const [isRecipientSaved, setIsRecipientSaved] = useState(false);
@@ -208,6 +205,9 @@ export default function TransferPage() {
             otpCode: otp.join(''),
           })
         ).unwrap();
+
+        // Clear debt reminder state after successful payment
+        dispatch(clearState());
       } else {
         await dispatch(
           confirmInternalTransfer({ transactionId, otp: otp.join('') })
@@ -246,6 +246,9 @@ export default function TransferPage() {
     setShowSaveModal(false);
     setIsRecipientSaved(false);
     setIsSavingRecipient(false);
+
+    // Clear debt reminder state
+    dispatch(clearState());
   };
 
   // Handle confirm transfer
@@ -259,7 +262,10 @@ export default function TransferPage() {
         amount: parseFloat(amount),
         content: description,
       };
-      const receiverBankCode = transferType !== 'account' ? receiverInfo.bank?.bankCode || null : selectedBankCode;
+      const receiverBankCode =
+        transferType !== 'account'
+          ? receiverInfo.bank?.bankCode || null
+          : selectedBankCode;
       if (receiverBankCode != null) {
         payload = { receiverBankCode, ...payload };
       }
@@ -290,15 +296,19 @@ export default function TransferPage() {
 
   // Handle save recipient
   const handleSaveRecipient = async () => {
-    try {      
-      const bankId = bankOptions.find(bank => bank.bankCode === selectedBankCode)?.linkedBankId || null;
-      await dispatch(addRecipient({
-        accountNumber: receiverInfo.accountNumber,
-        fullName: receiverInfo.fullName || receiverInfo.nickname,
-        bankId: bankId,
-        nickname: nickname.trim()
-      })).unwrap();
-      
+    try {
+      const bankId =
+        bankOptions.find((bank) => bank.bankCode === selectedBankCode)
+          ?.linkedBankId || null;
+      await dispatch(
+        addRecipient({
+          accountNumber: receiverInfo.accountNumber,
+          fullName: receiverInfo.fullName || receiverInfo.nickname,
+          bankId: bankId,
+          nickname: nickname.trim(),
+        })
+      ).unwrap();
+
       setToastMessage('Recipient saved successfully!');
     } catch (err) {
       setToastMessage(err?.message || 'An error occurred');
@@ -325,8 +335,8 @@ export default function TransferPage() {
                   {step === 1
                     ? 'Enter recipient details and amount'
                     : step === 2
-                      ? 'Confirm transfer details'
-                      : 'Verify with OTP'}
+                    ? 'Confirm transfer details'
+                    : 'Verify with OTP'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -363,11 +373,12 @@ export default function TransferPage() {
                               recipients.map((recipient) => (
                                 <div
                                   key={recipient.recipientId}
-                                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${receiverInfo?.recipientId ===
-                                      recipient.recipientId
+                                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                                    receiverInfo?.recipientId ===
+                                    recipient.recipientId
                                       ? 'border-blue-500 bg-blue-50'
                                       : 'hover:bg-gray-50'
-                                    }`}
+                                  }`}
                                   onClick={() =>
                                     handleSelectRecipient(recipient)
                                   }
@@ -379,10 +390,12 @@ export default function TransferPage() {
                                       </div>
                                       <div>
                                         <p className="font-medium">
-                                          {recipient.bank?.bankName || "Secure Bank"}
+                                          {recipient.bank?.bankName ||
+                                            'Secure Bank'}
                                         </p>
                                         <p className="font-medium">
-                                          {recipient.nickname} - <span className="text-sm text-muted-foreground">
+                                          {recipient.nickname} -{' '}
+                                          <span className="text-sm text-muted-foreground">
                                             {recipient.accountNumber}
                                           </span>
                                         </p>
@@ -390,8 +403,8 @@ export default function TransferPage() {
                                     </div>
                                     {receiverInfo?.recipientId ===
                                       recipient.recipientId && (
-                                        <CheckCircle2 className="h-5 w-5 text-blue-600" />
-                                      )}
+                                      <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                                    )}
                                   </div>
                                 </div>
                               ))
@@ -410,12 +423,19 @@ export default function TransferPage() {
                               id="bank"
                               className="w-full border rounded-md p-2"
                               value={selectedBankCode}
-                              onChange={(e) => setSelectedBankCode(e.target.value)}
+                              onChange={(e) =>
+                                setSelectedBankCode(e.target.value)
+                              }
                             >
                               <option value="">-- Choose a bank --</option>
-                              <option key="SCB" value="SCB">Secure Bank</option>
+                              <option key="SCB" value="SCB">
+                                Secure Bank
+                              </option>
                               {bankOptions.map((bank) => (
-                                <option key={bank.bankCode} value={bank.bankCode}>
+                                <option
+                                  key={bank.bankCode}
+                                  value={bank.bankCode}
+                                >
                                   {bank.bankName}
                                 </option>
                               ))}
@@ -433,7 +453,11 @@ export default function TransferPage() {
                             <Button
                               type="button"
                               onClick={() => handleAccountSearch(accountNumber)}
-                              disabled={!accountNumber.trim() || isSearching || !selectedBankCode.trim()}
+                              disabled={
+                                !accountNumber.trim() ||
+                                isSearching ||
+                                !selectedBankCode.trim()
+                              }
                             >
                               {isSearching ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -523,7 +547,9 @@ export default function TransferPage() {
                           <p className="text-sm text-muted-foreground">Bank</p>
                           <div className="p-4 border rounded-lg">
                             <p className="font-medium">
-                              {bankOptions.find(bank => bank.bankCode === selectedBankCode)?.bankName || "Secure Bank"}
+                              {bankOptions.find(
+                                (bank) => bank.bankCode === selectedBankCode
+                              )?.bankName || 'Secure Bank'}
                             </p>
                           </div>
                         </div>
@@ -534,7 +560,10 @@ export default function TransferPage() {
                           <p className="text-sm text-muted-foreground">Bank</p>
                           <div className="p-4 border rounded-lg">
                             <p className="font-medium">
-                              {bankOptions.find(bank => bank.bankCode === receiverInfo?.bank?.bankCode)?.bankName || "Secure Bank"}
+                              {bankOptions.find(
+                                (bank) =>
+                                  bank.bankCode === receiverInfo?.bank?.bankCode
+                              )?.bankName || 'Secure Bank'}
                             </p>
                           </div>
                         </div>
@@ -636,7 +665,8 @@ export default function TransferPage() {
                 ) : step === 2 ? (
                   <Button
                     onClick={handleConfirmTransfer}
-                    disabled={isConfirming}>
+                    disabled={isConfirming}
+                  >
                     Confirm Transfer
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -667,33 +697,44 @@ export default function TransferPage() {
               </div>
               <h2 className="text-2xl font-bold mb-2">Transfer Successful!</h2>
               <p className="text-muted-foreground mb-6">
-                You have successfully transferred ₫ {formatCurrency(amount)} to {receiverInfo.nickname || receiverInfo.fullName}
+                You have successfully transferred ₫ {formatCurrency(amount)} to{' '}
+                {receiverInfo.nickname || receiverInfo.fullName}
               </p>
               <div className="space-y-4">
                 <Button className="w-full" onClick={resetForm}>
                   Make Another Transfer
                 </Button>
-                <Button variant="outline" className="w-full"
-                  onClick={() => navigate('/customer/dashboard/history')}>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => navigate('/customer/dashboard/history')}
+                >
                   View Receipt
                 </Button>
                 {transferType === 'account' && (
-                <Button variant="outline" className="w-full" 
-                disabled={isRecipientSaved}
-                onClick={() => {
-                  setNickname(receiverInfo.nickname || receiverInfo.fullName);
-                  setIsRecipientSaved(true);
-                  setShowSaveModal(true);
-                }}>
-                  Save as Recipient
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isRecipientSaved}
+                    onClick={() => {
+                      setNickname(
+                        receiverInfo.nickname || receiverInfo.fullName
+                      );
+                      setIsRecipientSaved(true);
+                      setShowSaveModal(true);
+                    }}
+                  >
+                    Save as Recipient
+                  </Button>
                 )}
                 {isRecipientSaved && (
-                  <p className={`mt-4 text-sm text-center rounded-md p-2 ${
-                    toastMessage.toLowerCase().includes('successfully')
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}>
+                  <p
+                    className={`mt-4 text-sm text-center rounded-md p-2 ${
+                      toastMessage.toLowerCase().includes('successfully')
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}
+                  >
                     {toastMessage}
                   </p>
                 )}
@@ -716,11 +757,14 @@ export default function TransferPage() {
               />
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => {
-                setShowSaveModal(false); 
-                setIsSavingRecipient(false);
-                setIsRecipientSaved(false);
-              }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSaveModal(false);
+                  setIsSavingRecipient(false);
+                  setIsRecipientSaved(false);
+                }}
+              >
                 Cancel
               </Button>
               <Button
@@ -728,7 +772,8 @@ export default function TransferPage() {
                 onClick={() => {
                   setIsSavingRecipient(true);
                   handleSaveRecipient();
-                }}>
+                }}
+              >
                 Save
               </Button>
             </div>

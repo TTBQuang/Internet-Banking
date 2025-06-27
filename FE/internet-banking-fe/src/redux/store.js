@@ -11,6 +11,7 @@ import notificationsReducer from './notificationsSlice';
 import transfersReducer from './transferSlice';
 import debtPaymentReducer from './debtPaymentSlice';
 import linkedBankReducer from './linkedBankSlice';
+import transactionHistoryReducer from './transactionHistorySlice';
 
 export const store = configureStore({
   reducer: {
@@ -25,5 +26,6 @@ export const store = configureStore({
     transfers: transfersReducer,
     debtPayment: debtPaymentReducer,
     linkedBanks: linkedBankReducer,
+    transactionHistory: transactionHistoryReducer,
   },
 });
