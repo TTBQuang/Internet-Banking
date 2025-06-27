@@ -34,8 +34,6 @@ public class EmployeeController {
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<User>> registerEmployee(@RequestBody EmployeeRegistrationDto dto) {
-//        User employee = userService.createEmployee(dto);
-//        return ResponseEntity.ok(BaseResponse.data(employee));
         return ResponseEntity.ok(userService.createEmployee(dto));
     }
 

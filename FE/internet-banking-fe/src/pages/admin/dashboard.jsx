@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import DashboardLayout from "../../components/common/dashboard-layout-no-sidebar";
 import EmployeeManagement from "./EmployeeManagement";
-import TransactionHistory from "./TransactionHistory";
+import LinkedBankTransactionManagement from "./TransactionHistory";
 
 const AdminDashBoard = () => {
   const [tab, setTab] = useState("employees");
@@ -17,7 +17,7 @@ const AdminDashBoard = () => {
           <EmployeeManagement />
         </TabsContent>
         <TabsContent value="history">
-          <TransactionHistory />
+          <LinkedBankTransactionManagement />
         </TabsContent>
       </Tabs>
     </DashboardLayout>

@@ -8,6 +8,8 @@ import com.wnc.internet_banking.dto.response.transaction.TransactionDto;
 import com.wnc.internet_banking.entity.Transaction;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,4 +30,6 @@ public interface TransactionService {
     Page<TransactionDto> getReceivedTransactionsByUser(UUID userId, int page, int size);
 
     Page<TransactionDto> getDebtPaymentTransactionsByUser(UUID userId, int page, int size);
+
+    Page<TransactionDto> getLinkedBankTransactions(UUID bankId, LocalDateTime startDate, LocalDateTime endDate, int page, int size);
 }

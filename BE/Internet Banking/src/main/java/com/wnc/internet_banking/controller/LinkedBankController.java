@@ -7,7 +7,9 @@ import com.wnc.internet_banking.dto.response.BaseResponse;
 import com.wnc.internet_banking.dto.response.account.AccountDto;
 import com.wnc.internet_banking.dto.response.linkedbank.AccountResponseDto;
 import com.wnc.internet_banking.dto.response.linkedbank.LinkedBankDto;
+import com.wnc.internet_banking.dto.response.transaction.TransactionDto;
 import com.wnc.internet_banking.service.LinkedBankService;
+import com.wnc.internet_banking.service.impl.TransactionServiceImpl;
 import com.wnc.internet_banking.util.RSAUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,13 +21,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -34,6 +44,7 @@ import java.util.List;
 public class LinkedBankController {
     private final LinkedBankService linkedBankService;
     private final ObjectMapper objectMapper;
+    private final TransactionServiceImpl transactionService;
 
     @Value("${rsa.private-key}")
     private String privateKey;
@@ -347,6 +358,33 @@ public class LinkedBankController {
         return ResponseEntity.ok()
                 .header("X-Signature", signed)
                 .body(BaseResponse.message("Transfer successful."));
+    }
+
+
+    @GetMapping("/transactions")
+    @Operation(
+            summary = "Lấy danh sách giao dịch liên ngân hàng",
+            description = "Lấy danh sách giao dịch liên ngân hàng theo ngân hàng và khoảng thời gian, với phân trang.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Danh sách giao dịch được trả về thành công", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Chưa đăng nhập hoặc token không hợp lệ", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "Không có quyền truy cập", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Lỗi hệ thống", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<Page<TransactionDto>>> getTransactions(
+            @RequestParam(name = "bankId", required = false) @Parameter(description = "ID ngân hàng (tùy chọn, để trống để lấy tất cả giao dịch liên ngân hàng)", example = "123e4567-e89b-12d3-a456-426614174000") UUID bankId,
+            @RequestParam(name = "startDate", required = false) @Parameter(description = "Ngày bắt đầu (yyyy-MM-dd)", example = "2025-06-01") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate,
+            @RequestParam(name = "endDate", required = false) @Parameter(description = "Ngày kết thúc (yyyy-MM-dd)", example = "2025-06-30") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate,
+            @RequestParam(name = "page", defaultValue = "0") @Parameter(description = "Số trang", example = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") @Parameter(description = "Kích thước trang", example = "10") int size
+    ) {
+        try {
+            Page<TransactionDto> transactions = transactionService.getLinkedBankTransactions(bankId, startDate, endDate, page, size);
+            return ResponseEntity.ok(BaseResponse.data(transactions));
+        } catch (Exception e) {
+            return ResponseEntity.ok(BaseResponse.message("Lỗi khi lấy danh sách giao dịch: " + e.getMessage()));
+        }
     }
 
     private String getRawBody(HttpServletRequest request) throws IOException {
