@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/button";
 import Pagination from "../../components/common/pagination";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import moment from "moment";
+import { startOfDay, endOfDay, format } from "date-fns";
 
 export default function LinkedBankTransactionManagement() {
   const [transactions, setTransactions] = useState([]);
@@ -36,9 +36,14 @@ export default function LinkedBankTransactionManagement() {
         page: pageNum - 1,
         size: 5,
         ...(filters.bankId && { bankId: filters.bankId }),
-        ...(filters.startDate && { startDate: moment(filters.startDate).startOf("day").format("YYYY-MM-DD[T]HH:mm:ss") }),
-        ...(filters.endDate && { endDate: moment(filters.endDate).endOf("day").format("YYYY-MM-DD[T]HH:mm:ss") })
+        ...(filters.startDate && {
+          startDate: format(startOfDay(new Date(filters.startDate)), "yyyy-MM-dd'T'HH:mm:ss")
+        }),
+        ...(filters.endDate && {
+          endDate: format(endOfDay(new Date(filters.endDate)), "yyyy-MM-dd'T'HH:mm:ss")
+        })
       });
+  
       const res = await apiClient.get(`/api/linked-banks/transactions?${params}`);
       setTransactions(res.data.content || []);
       setTotalPages(res.data.page.totalPages || 1);
