@@ -24,6 +24,11 @@ public class NotificationTemplate {
         return "₫" + formatter.format(rawAmount);
     }
 
+    public static NotificationTemplate debtReminderCreated(String creditorFullName, Double amount) {
+        return new NotificationTemplate(
+                "New Debt Payment Request",
+                String.format("You have received a new debt payment request of %s from %s. Please review and complete the payment.", formatCurrency(amount), creditorFullName));
+    }
 
     public static NotificationTemplate debtPaymentCompleted(String debtorFullName, Double amount) {
         return new NotificationTemplate(
