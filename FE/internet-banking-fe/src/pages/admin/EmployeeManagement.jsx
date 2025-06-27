@@ -89,7 +89,7 @@ export default function EmployeeManagement() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
 
       <div className="bg-white shadow-md rounded-xl p-6">

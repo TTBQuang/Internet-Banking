@@ -68,7 +68,7 @@ export default function LinkedBankTransactionManagement() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
 
       <div className="bg-white shadow-md rounded-xl p-6">
@@ -132,7 +132,6 @@ export default function LinkedBankTransactionManagement() {
                     <th className="px-4 py-2">Loại</th>
                     <th className="px-4 py-2">Trạng thái</th>
                     <th className="px-4 py-2">Ngày tạo</th>
-                    <th className="px-4 py-2">Ngày xác nhận</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -149,7 +148,6 @@ export default function LinkedBankTransactionManagement() {
                       <td className="px-4 py-2">{t.type}</td>
                       <td className="px-4 py-2">{t.status}</td>
                       <td className="px-4 py-2">{new Date(t.createdAt).toLocaleString()}</td>
-                      <td className="px-4 py-2">{t.confirmedAt ? new Date(t.confirmedAt).toLocaleString() : "Chưa xác nhận"}</td>
                     </tr>
                   ))}
                 </tbody>
