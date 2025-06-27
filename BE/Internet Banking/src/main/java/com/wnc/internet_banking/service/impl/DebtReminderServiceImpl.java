@@ -83,6 +83,17 @@ public class DebtReminderServiceImpl implements DebtReminderService {
 
         debtReminderRepository.save(debtReminder);
 
+        // Notify to the debtor
+        NotificationTemplate notification = NotificationTemplate.debtReminderCreated(
+                creditor.getFullName(),
+                debtReminder.getAmount()
+        );
+
+        notificationService.createNotification(
+                debtorAccount.getUser().getUserId(),
+                notification.getTitle(),
+                notification.getContent());
+
         return modelMapper.map(debtReminder, DebtReminderDto.class);
     }
 
