@@ -5,6 +5,7 @@ import com.wnc.internet_banking.dto.request.transaction.ConfirmTransactionReques
 import com.wnc.internet_banking.dto.request.transaction.DebtPaymentRequest;
 import com.wnc.internet_banking.dto.request.transaction.TransferRequest;
 import com.wnc.internet_banking.dto.response.debtreminder.DebtReminderDto;
+import com.wnc.internet_banking.dto.response.linkedbank.LinkedBankDto;
 import com.wnc.internet_banking.dto.response.transaction.TransactionDto;
 import com.wnc.internet_banking.entity.*;
 import com.wnc.internet_banking.repository.*;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -269,5 +271,74 @@ public class TransactionServiceImpl implements TransactionService {
         Page<Transaction> transactions = transactionRepository.findBySenderAccountNumberAndType(account.getAccountNumber(), Transaction.Type.DEBT_PAYMENT, pageable);
 
         return transactions.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
+    }
+
+//    @Override
+//    public Page<TransactionDto> getLinkedBankTransactions(String bankCode, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+//        Page<Transaction> transactions = transactionRepository.findTransactionsByBankCodeAndDateRange(bankCode, startDate, endDate, pageable);
+//        return transactions.map(transaction -> {
+//            TransactionDto dto = modelMapper.map(transaction, TransactionDto.class);
+//            dto.setSenderAccountNumber(transaction.getSenderBank() != null ? transaction.getSenderBank().getBankCode() : null);
+//            dto.setReceiverAccountNumber(transaction.getReceiverBank() != null ? transaction.getReceiverBank().getBankCode() : null);
+//            return dto;
+//        });
+//    }
+    @Override
+    public Page<TransactionDto> getLinkedBankTransactions(UUID bankId, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Transaction> transactions;
+
+        // Kiểm tra tham số và gọi phương thức repository phù hợp
+        if (bankId == null) {
+            // Không có bankId
+            if (startDate == null && endDate == null) {
+                // Không có bộ lọc thời gian
+                transactions = transactionRepository.findAllInterBankTransactions(pageable);
+            } else if (startDate != null && endDate == null) {
+                // Chỉ có startDate
+                transactions = transactionRepository.findAllInterBankTransactionsByStartDate(startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                // Chỉ có endDate
+                transactions = transactionRepository.findAllInterBankTransactionsByEndDate(endDate, pageable);
+            } else {
+                // Có cả startDate và endDate
+                transactions = transactionRepository.findAllInterBankTransactionsByDateRange(startDate, endDate, pageable);
+            }
+        } else {
+            // Có bankId
+            if (startDate == null && endDate == null) {
+                // Không có bộ lọc thời gian
+                transactions = transactionRepository.findByBankId(bankId, pageable);
+            } else if (startDate != null && endDate == null) {
+                // Chỉ có startDate
+                transactions = transactionRepository.findByBankIdAndStartDate(bankId, startDate, pageable);
+            } else if (startDate == null && endDate != null) {
+                // Chỉ có endDate
+                transactions = transactionRepository.findByBankIdAndEndDate(bankId, endDate, pageable);
+            } else {
+                // Có cả startDate và endDate
+                transactions = transactionRepository.findByBankIdAndDateRange(bankId, startDate, endDate, pageable);
+            }
+        }
+
+        return transactions.map(transaction -> {
+            TransactionDto dto = modelMapper.map(transaction, TransactionDto.class);
+            if (transaction.getSenderBank() != null) {
+                LinkedBankDto senderBankDto = new LinkedBankDto();
+                senderBankDto.setLinkedBankId(transaction.getSenderBank().getLinkedBankId());
+                senderBankDto.setBankCode(transaction.getSenderBank().getBankCode());
+                senderBankDto.setBankName(transaction.getSenderBank().getBankName());
+                dto.setSenderBank(senderBankDto);
+            }
+            if (transaction.getReceiverBank() != null) {
+                LinkedBankDto receiverBankDto = new LinkedBankDto();
+                receiverBankDto.setLinkedBankId(transaction.getReceiverBank().getLinkedBankId());
+                receiverBankDto.setBankCode(transaction.getReceiverBank().getBankCode());
+                receiverBankDto.setBankName(transaction.getReceiverBank().getBankName());
+                dto.setReceiverBank(receiverBankDto);
+            }
+            return dto;
+        });
     }
 }
