@@ -3,6 +3,7 @@ package com.wnc.internet_banking.controller;
 import com.wnc.internet_banking.dto.request.account.DepositRequestDto;
 import com.wnc.internet_banking.dto.request.user.CustomerRegistrationDto;
 import com.wnc.internet_banking.dto.response.BaseResponse;
+import com.wnc.internet_banking.dto.response.user.UserDto;
 import com.wnc.internet_banking.entity.Account;
 import com.wnc.internet_banking.entity.User;
 import com.wnc.internet_banking.service.AccountService;
